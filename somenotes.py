@@ -15,3 +15,4 @@
 #     if isinstance(m, nn.BatchNorm2d):
 #         m.eval()
 # net.apply(freeze_bn)
+# file_list = os.listdir('D:/DIGISKY/data7')

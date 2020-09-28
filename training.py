@@ -9,17 +9,10 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # 读取数据
-data_train = MNIST('../data/MNIST',
-                   download=True,
-                   transform=transforms.Compose([
-                       transforms.Resize((32, 32)),
-                       transforms.ToTensor()]))
-data_test = MNIST('../data/MNIST',
-                  train=False,
-                  download=True,
-                  transform=transforms.Compose([
-                      transforms.Resize((32, 32)),
-                      transforms.ToTensor()]))
+data_train = MNIST('../data/MNIST', download=True,
+                   transform=transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()]))
+data_test = MNIST('../data/MNIST', train=False, download=True,
+                  transform=transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()]))
 
 # num_workers=8 使用多进程加载数据
 data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
@@ -33,11 +26,13 @@ net = net.to(device)
 # 定义损失函数：交叉熵
 criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=None, reduce=None, reduction='mean')
 # 定义网络优化方法：Adam
-optimizer = torch.optim.Adam(net.parameters(), lr=2e-3)
+optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 
 
 # 定义训练阶段
 def loss_train(epoch):
+    file_list = os.listdir('D:/DIGISKY/CNNTEST')
+    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + file_list[len(file_list) - 1]))
     net.train()
     train_accs, train_loss, batch_list = [], [], []
     for i, (images, labels) in enumerate(data_train_loader, start=1):
@@ -119,7 +114,7 @@ def draw_train_process(title, iters, train_loss, train_accs, label_cost, lable_a
 
 def main():
     loss, accu = [], []
-    for e in range(1, 3):
+    for e in range(1, 6):
         rec_data = loss_train(e)
         for i in range(len(rec_data[0])):
             loss.append(rec_data[0][i])
