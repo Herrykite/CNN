@@ -1,3 +1,4 @@
+# 本代码为训练与测试数据集相关的第一个版本
 import torch
 import matplotlib.pyplot as plt
 from torchvision.datasets.mnist import MNIST
