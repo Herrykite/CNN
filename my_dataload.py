@@ -7,10 +7,10 @@ from torchvision import transforms
 
 
 transform = transforms.Compose([
-    transforms.Resize(120),  # 缩放图片，保持长宽比不变，最短边的长为240像素,
-    transforms.CenterCrop(120),  # 从中间切出 120*120的图片
+    transforms.Resize(32),  # 缩放图片，保持长宽比不变，最短边的长为32像素,
+    transforms.CenterCrop(32),  # 从中间切出 32*32的图片
     transforms.ToTensor(),  # 将图片转换为Tensor,归一化至[0,1]
-    transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])  # 标准化至[-1,1]
+    transforms.Normalize(mean=[0.5], std=[0.5])  # 标准化至[-1,1]
 ])
 
 
@@ -23,7 +23,7 @@ class DataSet(data.Dataset):
 
     def __getitem__(self, index):
         img_path = self.images[index]
-        figure = Image.open(img_path)
+        figure = Image.open(img_path).convert('L')
         if self.transforms:
             img_data = self.transforms(figure)
         else:
