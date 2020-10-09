@@ -10,7 +10,7 @@ from Convolutional.cnn import CNN
 net = CNN()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 net = net.to(device)
-# 定义损失函数：交叉熵
+# 定义损失函数：交叉熵或MSE
 criterion = torch.nn.MSELoss()
 # 定义网络优化方法：Adam
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
@@ -37,7 +37,7 @@ def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
         v_data.append(vertics_x[j])
         v_data.append(vertics_y[j])
         v_data.append(vertics_z[j])
-    return np.array(v_data)
+    return np.array(v_data, dtype=np.float32)
 
 
 def normalize(initial_x):
@@ -54,26 +54,26 @@ def tell_labels(l_x, l_y, l_z):
 
 def train(epoch):
     net.train()
+    train_loss, batch_list = [], []
     for i, images in enumerate(data_train_loader, start=1):
         images, labels = images.to(device), train_labels.to(device)
-        print(images, '\n', len(images))
+        print('图片：\n', images[epoch][0])
+        print(labels, '\n标签个数：', len(labels))
         # 初始0梯度
         optimizer.zero_grad()
         # 网络前向运行
         output = net(images)
+        print('输出值：\n', output[epoch], '\n输出值维度:', len(output[epoch]))
         # 计算网络的损失函数
-        loss = criterion(output, labels)
-        optimizer.zero_grad()
-        output.backward()
-        optimizer.step()
-        predicted = output.detach().max(1)[1]
-        if epoch % 500 == 0:
-            print('训练轮次： %d, Loss值: %f' % (epoch, loss.detach().cuda().item()))
-            print('预测值如下：\n', predicted)
+        loss = criterion(output[epoch], labels)
+        train_loss.append(loss.detach().cuda().item())
+        print('\nloss:', loss, '\ntrain_loss:', train_loss)
         # 反向传播梯度
         loss.backward()
         # 优化更新权重
         optimizer.step()
+    torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(epoch) + '_CNN.pkl')
+    return train_loss
 
 
 if __name__ == '__main__':
@@ -81,13 +81,9 @@ if __name__ == '__main__':
     for num in range(len(file_list) - 5738):
         x, y, z = tell_vertics(num)
         vertics = tell_vertics_combine(x, y, z)
-        train_labels = vertics[:7000 * 3]
-        test_labels = vertics[7000 * 3:]
         data_train = DataSet(image_path + 'train')
-        data_test = DataSet(image_path + 'test')
-        train_labels = torch.tensor(train_labels)
-        test_labels = torch.tensor(test_labels)
-        data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True, num_workers=8)
-        data_test_loader = DataLoader(data_test, batch_size=64, num_workers=8)
-        for e in range(10):
-            train(train_labels)
+        train_labels = torch.tensor(vertics)
+        data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
+        for e in range(2):
+            train_loss = train(e)
+
