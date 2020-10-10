@@ -2,9 +2,9 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from Convolutional.deal_with_obj import loadObj
-from Convolutional.input_transform import DataSet
-from Convolutional.cnn import CNN
+from ConvNet.deal_with_obj import loadObj
+from ConvNet.input_transform import DataSet
+from ConvNet.cnn import CNN
 
 # 初始化网络
 net = CNN()
@@ -16,7 +16,7 @@ criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 # 定义路径
 path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
-image_path = 'D:/DIGISKY/CNN_input/'
+image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
 file_list = os.listdir(path)
 
 
@@ -59,17 +59,16 @@ def train(epoch):
     train_loss, batch_list = [], []
     for i, images in enumerate(data_train_loader, start=1):
         images, labels = images.to(device), train_labels.to(device)
-        print('图片：\n', images[epoch][0])
-        print(labels, '\n标签个数：', len(labels))
+        print('原始数据：\n', labels, '\n标签个数：', len(labels))
         # 初始0梯度
         optimizer.zero_grad()
         # 网络前向运行
         output = net(images)
-        print('输出值：\n', output[epoch], '\n输出值维度:', len(output[epoch]))
+        print('预测值：\n', output[epoch], '\n维度:', len(output[epoch]))
         # 计算网络的损失函数
         loss = criterion(output[epoch], labels)
         train_loss.append(loss.detach().cuda().item())
-        print('\nloss:', loss, '\ntrain_loss:', train_loss)
+        print('\nLoss:', train_loss[0])
         # 反向传播梯度
         loss.backward()
         # 优化更新权重
@@ -80,10 +79,10 @@ def train(epoch):
 
 if __name__ == '__main__':
     train_labels, test_labels = [], []
-    for num in range(len(file_list) - 5738):
+    for num in range(len(file_list)):
         x, y, z = tell_vertics(num)
         vertics = tell_vertics_combine(x, y, z)
-        data_train = DataSet(image_path + 'train')
+        data_train = DataSet(image_path)
         train_labels = torch.tensor(vertics)
         data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
         for e in range(5):
