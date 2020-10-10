@@ -42,7 +42,7 @@ def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
 
 def train(epoch):
     pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
-    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + file_list[len(pkl_list) - 1]))
+    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
     net.train()
     train_loss, batch_list = [], []
     for i, images in enumerate(data_train_loader, start=1):
@@ -56,7 +56,7 @@ def train(epoch):
         # 计算网络的损失函数
         loss = criterion(output[epoch], labels)
         train_loss.append(loss.detach().cuda().item())
-        print('\nLoss:', train_loss[0])
+        print('\nLoss:', train_loss[0][epoch])
         # 反向传播梯度
         loss.backward()
         # 优化更新权重
@@ -73,6 +73,5 @@ if __name__ == '__main__':
         data_train = DataSet(image_path)
         train_labels = torch.tensor(vertics)
         data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
-        for e in range(5):
-            train_loss = train(e)
+        mse_loss = train(num)
 
