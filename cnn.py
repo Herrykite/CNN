@@ -1,4 +1,3 @@
-import torch
 from collections import OrderedDict
 from torch import nn
 

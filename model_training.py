@@ -2,8 +2,8 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from Convolutional.readobj import loadObj
-from Convolutional.my_dataload import DataSet
+from Convolutional.deal_with_obj import loadObj
+from Convolutional.input_transform import DataSet
 from Convolutional.cnn import CNN
 
 # 初始化网络
@@ -53,6 +53,8 @@ def tell_labels(l_x, l_y, l_z):
 
 
 def train(epoch):
+    pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
+    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + file_list[len(pkl_list) - 1]))
     net.train()
     train_loss, batch_list = [], []
     for i, images in enumerate(data_train_loader, start=1):
@@ -84,6 +86,6 @@ if __name__ == '__main__':
         data_train = DataSet(image_path + 'train')
         train_labels = torch.tensor(vertics)
         data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
-        for e in range(2):
+        for e in range(5):
             train_loss = train(e)
 
