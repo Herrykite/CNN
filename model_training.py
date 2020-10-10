@@ -44,7 +44,6 @@ def train(epoch):
     pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
     net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
     net.train()
-    train_loss, batch_list = [], []
     for i, images in enumerate(data_train_loader, start=1):
         images, labels = images.to(device), train_labels.to(device)
         print('原始数据：\n', labels, '\n标签个数：', len(labels))
@@ -55,14 +54,13 @@ def train(epoch):
         print('预测值：\n', output[epoch], '\n维度:', len(output[epoch]))
         # 计算网络的损失函数
         loss = criterion(output[epoch], labels)
-        train_loss.append(loss.detach().cuda().item())
-        print('\nLoss:', train_loss[0][epoch])
+        print('\nLoss:', loss.detach().cuda().item())
         # 反向传播梯度
         loss.backward()
         # 优化更新权重
         optimizer.step()
-    torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(epoch) + '_CNN.pkl')
-    return train_loss
+        torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(epoch) + '_CNN.pkl')
+        return loss.detach().cuda().item()
 
 
 if __name__ == '__main__':
@@ -73,5 +71,5 @@ if __name__ == '__main__':
         data_train = DataSet(image_path)
         train_labels = torch.tensor(vertics)
         data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
-        mse_loss = train(num)
+        loss = train(num)
 
