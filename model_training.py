@@ -40,18 +40,6 @@ def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
     return np.array(v_data, dtype=np.float32)
 
 
-def normalize(initial_x):
-    x_mean = np.mean(initial_x)
-    x_std = np.std(initial_x, ddof=1)  # 加入ddof=1则为无偏样本标准差
-    normalized_x = (initial_x - x_mean) / x_std
-    return normalized_x
-
-
-def tell_labels(l_x, l_y, l_z):
-    label = tell_vertics_combine(normalize(l_x), normalize(l_y), normalize(l_z))
-    return label
-
-
 def train(epoch):
     pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
     net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + file_list[len(pkl_list) - 1]))
