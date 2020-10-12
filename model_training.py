@@ -40,36 +40,42 @@ def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
     return np.array(v_data, dtype=np.float32)
 
 
-def train(epoch):
+def train(order):
     pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
-    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
+    # if os.path.exists('D:/DIGISKY/CNNTEST/' + str(order) + '_CNN.pkl'):
+    #     net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
     net.train()
     for i, images in enumerate(data_train_loader, start=1):
         images, labels = images.to(device), train_labels.to(device)
-        print('原始数据：\n', labels, '\n标签个数：', len(labels))
-        # 初始0梯度
+        print('第', order + 1, '组原始数据：\n', labels)
         optimizer.zero_grad()
         # 网络前向运行
         output = net(images)
-        print('预测值：\n', output[epoch], '\n维度:', len(output[epoch]))
+        print('预测值：\n', sum(output) / 8)
         # 计算网络的损失函数
-        loss = criterion(output[epoch], labels)
-        print('\nLoss:', loss.detach().cuda().item())
+        loss = criterion(sum(output) / 8, labels)
         # 反向传播梯度
         loss.backward()
         # 优化更新权重
         optimizer.step()
-        torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(epoch) + '_CNN.pkl')
-        return loss.detach().cuda().item()
+        train_loss.append(loss.detach().cuda().item())
+        print('Loss =', train_loss[len(train_loss)-1])
+        if len(train_loss) > 1:
+            if train_loss[len(train_loss) - 1] - train_loss[len(train_loss) - 2] < 0:
+                torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(order + 1) + '_CNN.pkl')
+            else:
+                pass
+        else:
+            pass
+        break
 
 
 if __name__ == '__main__':
-    train_labels, test_labels = [], []
-    for num in range(len(file_list)):
+    train_labels, train_loss = [], []
+    for num in range(len(file_list) - 1):
         x, y, z = tell_vertics(num)
         vertics = tell_vertics_combine(x, y, z)
         data_train = DataSet(image_path)
         train_labels = torch.tensor(vertics)
-        data_train_loader = DataLoader(data_train, batch_size=128, shuffle=True)
-        loss = train(num)
-
+        data_train_loader = DataLoader(data_train, batch_size=8, shuffle=True)
+        train(num)
