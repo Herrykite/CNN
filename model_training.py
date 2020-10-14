@@ -1,3 +1,4 @@
+from __future__ import division
 import os
 import numpy as np
 import torch
@@ -20,6 +21,15 @@ image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
 file_list = os.listdir(path)
 
 
+def normalize(initial_x):
+    x_mean = np.mean(initial_x)
+    # x_min = np.min(initial_x)
+    x_std = np.std(initial_x, ddof=1)  # 加入ddof=1则为无偏样本标准差
+    normalized_x = (initial_x - x_mean) / x_std
+    # normalized_x = initial_x - x_min
+    return normalized_x
+
+
 def tell_vertics(count):
     vertics_x, vertics_y, vertics_z = [], [], []
     if file_list[count].endswith('.obj'):
@@ -35,47 +45,42 @@ def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
     v_data = []
     for j in range(len(vertics_x)):
         v_data.append(vertics_x[j])
+    for j in range(len(vertics_y)):
         v_data.append(vertics_y[j])
+    for j in range(len(vertics_z)):
         v_data.append(vertics_z[j])
-    return np.array(v_data, dtype=np.float32)
+    v_data = np.array(v_data, dtype=np.float32)
+    return v_data
 
 
-def train(order):
-    pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
-    # if os.path.exists('D:/DIGISKY/CNNTEST/' + str(order) + '_CNN.pkl'):
-    #     net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
-    net.train()
-    for i, images in enumerate(data_train_loader, start=1):
-        images, labels = images.to(device), train_labels.to(device)
-        print('第', order + 1, '组原始数据：\n', labels)
+def train(number):
+    for i, (images, index) in enumerate(loader, start=1):
+        images = images.to(device)
+        vertics = []  # 每一批Batch以后重置Obj获取的顶点
+        for batch in range(len(images)):  # data[0]为图片数据，data[1]为图片索引数组，data[0]大小为64*1*240*320
+            x, y, z = tell_vertics(index[0][batch])
+            vertics.append(tell_vertics_combine(x, y, z))
+        labels = torch.tensor(vertics)
+        labels = labels.to(device)
+        print('第', number+1, '轮   第', i, '组原始数据：\n', labels)
+        print('初始数据维度：', len(labels))
         optimizer.zero_grad()
-        # 网络前向运行
-        output = net(images)
-        print('预测值：\n', sum(output) / 8)
-        # 计算网络的损失函数
-        loss = criterion(sum(output) / 8, labels)
-        # 反向传播梯度
-        loss.backward()
-        # 优化更新权重
-        optimizer.step()
-        train_loss.append(loss.detach().cuda().item())
-        print('Loss =', train_loss[len(train_loss)-1])
-        if len(train_loss) > 1:
-            if train_loss[len(train_loss) - 1] - train_loss[len(train_loss) - 2] < 0:
-                torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(order + 1) + '_CNN.pkl')
-            else:
-                pass
-        else:
-            pass
-        break
+        output = net(images)              # 网络前向运行
+        print('预测值：\n', output, '\n预测值维度：', len(output))
+        loss = criterion(output, labels)  # 计算网络的损失函数
+        loss.backward()                   # 反向传播梯度
+        optimizer.step()                  # 优化更新权重
+        print('Loss =', loss)
+        if i % 10 == 9:
+            torch.save(net.state_dict(), 'D:/DIGISKY/CNNTEST/' + str(number + 1) + '_CNN.pkl')
+            print('\n网络参数已保存!\n')
 
 
 if __name__ == '__main__':
-    train_labels, train_loss = [], []
-    for num in range(len(file_list) - 1):
-        x, y, z = tell_vertics(num)
-        vertics = tell_vertics_combine(x, y, z)
-        data_train = DataSet(image_path)
-        train_labels = torch.tensor(vertics)
-        data_train_loader = DataLoader(data_train, batch_size=8, shuffle=True)
-        train(num)
+    # net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/' + pkl_list[len(pkl_list) - 1]))
+    pkl_list = os.listdir('D:/DIGISKY/CNNTEST')
+    image_address = DataSet(image_path)
+    loader = DataLoader(image_address, batch_size=128, shuffle=True)
+    for epoch in range(10):
+        train(epoch)
+
