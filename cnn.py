@@ -31,7 +31,7 @@ class CNN(nn.Module):
             # ('conv6b', nn.Conv2d(486, 486, kernel_size=(3, 3), stride=1, padding=1)),
             # ('relu12', nn.ReLU())
             ]))
-        self.dropout = nn.Dropout(p=0.2)
+        # self.dropout = nn.Dropout(p=0.2)
         self.fc1 = nn.Sequential(OrderedDict([
             ('fc1', nn.Linear(3888, 22971))
         ]))
@@ -42,6 +42,6 @@ class CNN(nn.Module):
         # print('输入图片卷积后大小：', x.size())
         # 在第一个全连接层与卷积层连接的位置需要将特征图拉成一个一维向量
         x = x.view(x.size(0), -1)
-        x = self.dropout(x)
+        # x = self.dropout(x)
         x = self.fc1(x)
         return x

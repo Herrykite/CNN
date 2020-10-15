@@ -1,6 +1,6 @@
 import json
 import os
-from Convolutional.readobj import loadObj
+from ConvNet.deal_with_obj import loadObj
 
 
 def Woodblock(order, data):
