@@ -37,9 +37,9 @@ class CNN(nn.Module):
         ]))
 
     def forward(self, x):
-        print('输入图片卷积前大小：', x.size())
+        # print('输入图片卷积前大小：', x.size())
         x = self.conv_net(x)
-        print('输入图片卷积后大小：', x.size())
+        # print('输入图片卷积后大小：', x.size())
         # 在第一个全连接层与卷积层连接的位置需要将特征图拉成一个一维向量
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
