@@ -1,0 +1,17 @@
+{
+    "camera2": {
+        "mesh":[
+            {
+            "tag": "vertics",
+            "points": [
+               ]
+            },
+            {
+            "tag": "faces",
+            "points": [
+               ]
+            }
+               ]
+            }
+        
+    }
