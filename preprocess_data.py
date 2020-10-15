@@ -1,10 +1,11 @@
 import json
 import os
+import re
 import numpy as np
 from ConvNet.deal_with_obj import loadObj
 
 
-def Woodblock(order, data):            # 活字印刷术
+def Woodblock(order, data):  # 活字印刷术
     path1 = 'D:/DIGISKY/'
     listdir1 = os.listdir(path1)
     if 'CNN_Format_Camera2.data' in listdir1:
@@ -33,7 +34,7 @@ def initial_load():
 
 
 def get_vertics(count):
-    f = open('D:/DIGISKY/CNN_output_data/'+count+'.data')
+    f = open('D:/DIGISKY/CNN_output_data/' + re.sub("\D", "", str(count)) + '.data')
     model = json.load(f)
     vertics = []
     for j in range(3):

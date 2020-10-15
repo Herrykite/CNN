@@ -1,12 +1,11 @@
-from __future__ import division
 import os
-import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from ConvNet.deal_with_obj import loadObj, writeObj
 from ConvNet.input_transform import DataSet, SingleTest
 from ConvNet.cnn import CNN
+from ConvNet.preprocess_data import get_vertics
 from sklearn.metrics import mean_squared_error
 
 # 初始化网络
@@ -26,44 +25,43 @@ test_label_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/outpu
 file_list = os.listdir(path)
 
 
-def normalize(initial_x):
-    x_mean = np.mean(initial_x)
-    # x_min = np.min(initial_x)
-    x_std = np.std(initial_x, ddof=1)  # 加入ddof=1则为无偏样本标准差
-    normalized_x = (initial_x - x_mean) / x_std
-    # normalized_x = initial_x - x_min
-    return normalized_x
+# def normalize(initial_x):
+#     x_mean = np.mean(initial_x)
+#     # x_min = np.min(initial_x)
+#     x_std = np.std(initial_x, ddof=1)  # 加入ddof=1则为无偏样本标准差
+#     normalized_x = (initial_x - x_mean) / x_std
+#     # normalized_x = initial_x - x_min
+#     return normalized_x
 
 
-def tell_vertics(count):
-    vertics_x, vertics_y, vertics_z = [], [], []
-    if file_list[count].endswith('.obj'):
-        vertics, faces = loadObj(path + file_list[count])
-        for i in range(len(vertics)):
-            vertics_x.append(vertics[i][0])
-            vertics_y.append(vertics[i][1])
-            vertics_z.append(vertics[i][2])
-    return vertics_x, vertics_y, vertics_z
+# def tell_vertics(count):
+#     vertics_x, vertics_y, vertics_z = [], [], []
+#     if file_list[count].endswith('.obj'):
+#         vertics, faces = loadObj(path + file_list[count])
+#         for i in range(len(vertics)):
+#             vertics_x.append(vertics[i][0])
+#             vertics_y.append(vertics[i][1])
+#             vertics_z.append(vertics[i][2])
+#     return vertics_x, vertics_y, vertics_z
 
 
-def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
-    v_data = []
-    for j in range(len(vertics_x)):
-        v_data.append(vertics_x[j])
-    for j in range(len(vertics_y)):
-        v_data.append(vertics_y[j])
-    for j in range(len(vertics_z)):
-        v_data.append(vertics_z[j])
-    v_data = np.array(v_data, dtype=np.float32)
-    return v_data
+# def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
+#     v_data = []
+#     for j in range(len(vertics_x)):
+#         v_data.append(vertics_x[j])
+#     for j in range(len(vertics_y)):
+#         v_data.append(vertics_y[j])
+#     for j in range(len(vertics_z)):
+#         v_data.append(vertics_z[j])
+#     v_data = np.array(v_data, dtype=np.float32)
+#     return v_data
 
 
 def mix():
     for i, (images, index) in enumerate(loader, start=1):
         vertics = []  # 每一批Batch以后重置Obj获取的顶点
-        for batch in range(len(images)):  # data[0]为图片数据，data[1]为图片索引数组，data[0]大小为128*1*240*320
-            x, y, z = tell_vertics(index[0][batch])
-            vertics.append(tell_vertics_combine(x, y, z))
+        for batch in range(len(images)):  # images为图片数据，index为图片索引数组，images大小为128*1*240*320
+            vertics.append(get_vertics(index[0][batch]))
         return vertics, images, i
 
 
@@ -111,7 +109,7 @@ def proofread(number):
         pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
         loss += mean_squared_error(vertics[order], pre_vertics[order])
     print('测试图片输出数据Loss =', loss)
-    writeObj('C:/Users/admin/Desktop/' + number + '_test.obj', pre_vertics, faces)
+    writeObj('C:/Users/admin/Desktop/' + str(number) + '_test.obj', pre_vertics, faces)
 
 
 def draw_train_process(title, i, loss, label):
