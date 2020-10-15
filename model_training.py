@@ -57,14 +57,6 @@ file_list = os.listdir(path)
 #     return v_data
 
 
-def mix():
-    for i, (images, index) in enumerate(loader, start=1):
-        vertics = []  # 每一批Batch以后重置Obj获取的顶点
-        for batch in range(len(images)):  # images为图片数据，index为图片索引数组，images大小为128*1*240*320
-            vertics.append(get_vertics(index[0][batch]))
-        return vertics, images, i
-
-
 def save(number):
     torch.save(net.state_dict(), 'D:/DIGISKY/CNNpkl/' + str(number + 1) + '_CNN.pkl')
     torch.save(optimizer.state_dict(), 'D:/DIGISKY/CNNpkl/opt.pkl')
@@ -73,24 +65,27 @@ def save(number):
 
 def train(number):
     net.train()
-    vertics, images, i = mix()
-    images = images.to(device)
-    labels = torch.tensor(vertics)
-    labels = labels.to(device)
-    print('第', number + 1, '轮   第', i, '组：')
-    print('初始数据：\n', labels)
-    optimizer.zero_grad()
-    output = net(images)  # 网络前向运行
-    predict = sum(output) / 128
-    print('预测值：\n', output, '\n预测值维度：', len(predict))
-    loss = criterion(output, labels)  # 计算网络的损失函数
-    print('Loss =', loss.item())
-    train_loss.append(loss.item())
-    loss.backward()  # 反向传播梯度
-    optimizer.step()  # 优化更新权重
-    iters = range(len(train_loss))
-    if len(train_loss) % 1000 == 0:
-        draw_train_process('The Training Process', iters, train_loss, 'Loss')
+    for i, (images, index) in enumerate(loader, start=1):
+        vertics = []  # 每一批Batch以后重置Obj获取的顶点
+        for batch in range(len(images)):  # images为图片数据，index为图片索引数组，images大小为128*1*240*320
+            vertics.append(get_vertics(index[0][batch]))
+        images = images.to(device)
+        labels = torch.tensor(vertics)
+        labels = labels.to(device)
+        print('第', number + 1, '轮   第', i, '组：')
+        print('初始数据：\n', labels)
+        optimizer.zero_grad()
+        output = net(images)  # 网络前向运行
+        predict = sum(output) / 128
+        print('预测值：\n', output, '\n预测值维度：', len(predict))
+        loss = criterion(output, labels)  # 计算网络的损失函数
+        print('Loss =', loss.item())
+        train_loss.append(loss.item())
+        loss.backward()  # 反向传播梯度
+        optimizer.step()  # 优化更新权重
+        iters = range(len(train_loss))
+        if len(train_loss) % 1000 == 0:
+            draw_train_process('The Training Process', iters, train_loss, 'Loss')
 
 
 def proofread(number):
