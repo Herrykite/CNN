@@ -36,3 +36,17 @@ class DataSet(data.Dataset):
     def __len__(self):
         return len(self.images)
 
+
+class SingleTest:
+    def __init__(self, img_path):
+        self.transforms = transform
+        self.img_path = img_path
+
+    def output_data(self, img_path):
+        figure = Image.open(img_path).convert('L')
+        if self.transforms:
+            img_data = self.transforms(figure)
+        else:
+            figure = np.asarray(figure, dtype=np.float32)
+            img_data = torch.from_numpy(figure)
+        return img_data
