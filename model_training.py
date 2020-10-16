@@ -9,52 +9,6 @@ from ConvNet.cnn import CNN
 from ConvNet.preprocess_data import get_vertics, mkdir
 from sklearn.metrics import mean_squared_error
 
-# 初始化网络
-net = CNN()
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-net = net.to(device)
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-# 定义损失函数：交叉熵或MSE
-criterion = torch.nn.MSELoss()
-# 定义网络优化方法：Adam
-optimizer = torch.optim.Adam(net.parameters(), lr=1e-5)
-# 定义路径
-path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
-image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
-label_list = os.listdir(path)
-image_list = os.listdir(image_path)
-
-# def normalize(initial_x):
-#     x_mean = np.mean(initial_x)
-#     # x_min = np.min(initial_x)
-#     x_std = np.std(initial_x, ddof=1)  # 加入ddof=1则为无偏样本标准差
-#     normalized_x = (initial_x - x_mean) / x_std
-#     # normalized_x = initial_x - x_min
-#     return normalized_x
-
-
-# def tell_vertics(count):
-#     vertics_x, vertics_y, vertics_z = [], [], []
-#     if file_list[count].endswith('.obj'):
-#         vertics, faces = loadObj(path + file_list[count])
-#         for i in range(len(vertics)):
-#             vertics_x.append(vertics[i][0])
-#             vertics_y.append(vertics[i][1])
-#             vertics_z.append(vertics[i][2])
-#     return vertics_x, vertics_y, vertics_z
-
-
-# def tell_vertics_combine(vertics_x, vertics_y, vertics_z):
-#     v_data = []
-#     for j in range(len(vertics_x)):
-#         v_data.append(vertics_x[j])
-#     for j in range(len(vertics_y)):
-#         v_data.append(vertics_y[j])
-#     for j in range(len(vertics_z)):
-#         v_data.append(vertics_z[j])
-#     v_data = np.array(v_data, dtype=np.float32)
-#     return v_data
-
 
 def save(number):
     mkdir('./CNN_output_parameter')
@@ -76,8 +30,7 @@ def train(number):
         print('初始数据：\n', labels)
         optimizer.zero_grad()
         output = net(images)  # 网络前向运行
-        predict = sum(output) / 128
-        print('预测值：\n', output, '\n预测值维度：', len(predict))
+        print('预测值：\n', output, )
         loss = criterion(output, labels)  # 计算网络的损失函数
         print('Loss =', loss.item())
         train_loss.append(loss.item())
@@ -93,14 +46,14 @@ def proofread(number):
     pre_vertics = []
     loss = 0
     rand = np.random.randint(0, len(image_list))
-    test = SingleTest(img_path=image_path+image_list[rand])
-    image = test.output_data(img_path=image_path+image_list[rand])
+    test = SingleTest(img_path=image_path + image_list[rand])
+    image = test.output_data(img_path=image_path + image_list[rand])
     image = image.expand(64, 1, 320, 240)
     image = image.to(device)
     with torch.no_grad():
         predict = net(image)
     predict = predict[0].cpu().numpy()
-    vertics, faces = loadObj(path+label_list[rand])
+    vertics, faces = loadObj(path + label_list[rand])
     for order in range(len(predict) // 3):
         pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
         loss += mean_squared_error(vertics[order], pre_vertics[order])
@@ -119,13 +72,34 @@ def draw_train_process(title, i, loss, label):
 
 
 if __name__ == '__main__':
+    epoch = 0
+    # 初始化网络
+    net = CNN()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    net = net.to(device)
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+    # 定义损失函数：交叉熵或MSE
+    criterion = torch.nn.MSELoss()
+    # 定义网络优化方法：Adam
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
+    # 定义路径
+    path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
+    image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
+    label_list = os.listdir(path)
+    image_list = os.listdir(image_path)
     train_loss = []
-    net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
-    optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
+    # net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
+    # optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
-    epoch = 0
     while True:
+        # 定义网络优化方法：Adam
+        if epoch > 0 & epoch < 100:
+            optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
+        elif epoch >= 100 & epoch < 500:
+            optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
+        elif epoch >= 500:
+            optimizer = torch.optim.Adam(net.parameters(), lr=1e-5)
         train(epoch)
         proofread(epoch)
         if epoch % 10 == 0:
