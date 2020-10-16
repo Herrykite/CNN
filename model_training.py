@@ -1,11 +1,12 @@
 import os
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 from torch.utils.data import DataLoader
 from ConvNet.deal_with_obj import loadObj, writeObj
 from ConvNet.input_transform import DataSet, SingleTest
 from ConvNet.cnn import CNN
-from ConvNet.preprocess_data import get_vertics
+from ConvNet.preprocess_data import get_vertics, mkdir
 from sklearn.metrics import mean_squared_error
 
 # 初始化网络
@@ -20,10 +21,8 @@ optimizer = torch.optim.Adam(net.parameters(), lr=1e-5)
 # 定义路径
 path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
 image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
-test_image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/1597997561368.jpg'
-test_label_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/10.obj'
-file_list = os.listdir(path)
-
+label_list = os.listdir(path)
+image_list = os.listdir(image_path)
 
 # def normalize(initial_x):
 #     x_mean = np.mean(initial_x)
@@ -58,8 +57,9 @@ file_list = os.listdir(path)
 
 
 def save(number):
-    torch.save(net.state_dict(), 'D:/DIGISKY/CNNpkl/' + str(number + 1) + '_CNN.pkl')
-    torch.save(optimizer.state_dict(), 'D:/DIGISKY/CNNpkl/opt.pkl')
+    mkdir('./CNN_output_parameter')
+    torch.save(net.state_dict(), './CNN_output_parameter/' + str(number + 1) + '_CNN.pkl')
+    torch.save(optimizer.state_dict(), './CNN_output_parameter/opt.pkl')
     print('\n网络参数已保存!\n')
 
 
@@ -84,7 +84,7 @@ def train(number):
         loss.backward()  # 反向传播梯度
         optimizer.step()  # 优化更新权重
         iters = range(len(train_loss))
-        if len(train_loss) % 1000 == 0:
+        if len(train_loss) % 90 == 0:
             draw_train_process('The Training Process', iters, train_loss, 'Loss')
 
 
@@ -92,19 +92,21 @@ def proofread(number):
     net.eval()  # 必须有此句，否则有输入数据，即使不训练也会改变权值。
     pre_vertics = []
     loss = 0
-    test = SingleTest(img_path=test_image_path)
-    image = test.output_data(img_path=test_image_path)
+    rand = np.random.randint(0, len(image_list))
+    test = SingleTest(img_path=image_path+image_list[rand])
+    image = test.output_data(img_path=image_path+image_list[rand])
     image = image.expand(64, 1, 320, 240)
     image = image.to(device)
     with torch.no_grad():
         predict = net(image)
     predict = predict[0].cpu().numpy()
-    vertics, faces = loadObj(test_label_path)
+    vertics, faces = loadObj(path+label_list[rand])
     for order in range(len(predict) // 3):
         pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
         loss += mean_squared_error(vertics[order], pre_vertics[order])
     print('测试图片输出数据Loss =', loss)
-    writeObj('C:/Users/admin/Desktop/' + str(number) + '_test.obj', pre_vertics, faces)
+    mkdir('./CNN_test_output')
+    writeObj('./CNN_test_output/' + str(number) + '_test.obj', pre_vertics, faces)
 
 
 def draw_train_process(title, i, loss, label):
@@ -118,14 +120,14 @@ def draw_train_process(title, i, loss, label):
 
 if __name__ == '__main__':
     train_loss = []
-    net.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/1_CNN.pkl'))
-    optimizer.load_state_dict(torch.load('D:/DIGISKY/CNNTEST/opt.pkl'))
+    net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
+    optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     epoch = 0
     while True:
         train(epoch)
-        if epoch % 100 == 0:
+        proofread(epoch)
+        if epoch % 10 == 0:
             save(epoch)
-            proofread(epoch)
         epoch += 1
