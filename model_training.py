@@ -71,6 +71,15 @@ def draw_train_process(title, i, loss, label):
     plt.show()
 
 
+def adjust_learning_rate(lr, number):
+    if lr > 10e-6:
+        lr -= lr * (0.1 ** (number // 30))
+    else:
+        return lr
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+
 if __name__ == '__main__':
     epoch = 0
     # 初始化网络
@@ -93,13 +102,6 @@ if __name__ == '__main__':
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     while True:
-        # 定义网络优化方法：Adam
-        if epoch > 0 & epoch < 100:
-            optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
-        elif epoch >= 100 & epoch < 500:
-            optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
-        elif epoch >= 500:
-            optimizer = torch.optim.Adam(net.parameters(), lr=1e-5)
         train(epoch)
         proofread(epoch)
         if epoch % 10 == 0:
