@@ -73,10 +73,10 @@ def draw_train_process(title, i, loss, label):
 
 
 def adjust_learning_rate(leaning_rate, number):
-    if leaning_rate > 10e-6:
-        leaning_rate -= leaning_rate * (0.1 ** (number // 30))
+    if leaning_rate > 1e-6:
+        leaning_rate -= leaning_rate * (0.01 ** (number // 30))
     else:
-        return leaning_rate
+        leaning_rate = 1e-6
     for param_group in optimizer.param_groups:
         param_group['lr'] = leaning_rate
     print('学习率已更新为：', leaning_rate)
@@ -100,8 +100,8 @@ if __name__ == '__main__':
     label_list = os.listdir(path)
     image_list = os.listdir(image_path)
     train_loss = []
-    net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
-    optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
+    # net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
+    # optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     while True:
