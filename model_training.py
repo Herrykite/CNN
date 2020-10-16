@@ -46,6 +46,7 @@ def proofread(number):
     pre_vertics = []
     loss = 0
     rand = np.random.randint(0, len(image_list))
+    print('测试图片为:', image_list[rand], '\n对应Obj为：', label_list[rand])
     test = SingleTest(img_path=image_path + image_list[rand])
     image = test.output_data(img_path=image_path + image_list[rand])
     image = image.expand(64, 1, 320, 240)
@@ -71,9 +72,9 @@ def draw_train_process(title, i, loss, label):
     plt.show()
 
 
-def adjust_learning_rate(lr, number):
-    if lr > 10e-6:
-        lr -= lr * (0.1 ** (number // 30))
+def adjust_learning_rate(leaning_rate, number):
+    if leaning_rate > 10e-6:
+        leaning_rate -= leaning_rate * (0.1 ** (number // 30))
     else:
         return lr
     for param_group in optimizer.param_groups:
@@ -82,6 +83,7 @@ def adjust_learning_rate(lr, number):
 
 if __name__ == '__main__':
     epoch = 0
+    lr = 10e-3
     # 初始化网络
     net = CNN()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -90,7 +92,7 @@ if __name__ == '__main__':
     # 定义损失函数：交叉熵或MSE
     criterion = torch.nn.MSELoss()
     # 定义网络优化方法：Adam
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(net.parameters(), lr=lr)
     # 定义路径
     path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
     image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
@@ -106,4 +108,5 @@ if __name__ == '__main__':
         proofread(epoch)
         if epoch % 10 == 0:
             save(epoch)
+        adjust_learning_rate(lr, epoch)
         epoch += 1
