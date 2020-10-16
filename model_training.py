@@ -53,14 +53,14 @@ def proofread(number):
     image = image.to(device)
     with torch.no_grad():
         predict = net(image)
-    predict = predict[0].cpu().numpy()
-    vertics, faces = loadObj(path + label_list[rand])
-    for order in range(len(predict) // 3):
-        pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
-        loss += mean_squared_error(vertics[order], pre_vertics[order])
-    print('测试图片输出数据Loss =', loss)
-    mkdir('./CNN_test_output')
-    writeObj('./CNN_test_output/' + str(number) + '_test.obj', pre_vertics, faces)
+        predict = predict[0].cpu().numpy()
+        vertics, faces = loadObj(path + label_list[rand])
+        for order in range(len(predict) // 3):
+            pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
+            loss += mean_squared_error(vertics[order], pre_vertics[order])
+        print('测试图片输出数据Loss =', loss)
+        mkdir('./CNN_test_output')
+        writeObj('./CNN_test_output/' + str(number) + '_test.obj', pre_vertics, faces)
 
 
 def draw_train_process(title, i, loss, label):
@@ -76,14 +76,15 @@ def adjust_learning_rate(leaning_rate, number):
     if leaning_rate > 10e-6:
         leaning_rate -= leaning_rate * (0.1 ** (number // 30))
     else:
-        return lr
+        return leaning_rate
     for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+        param_group['lr'] = leaning_rate
+    print('学习率已更新为：', leaning_rate)
 
 
 if __name__ == '__main__':
     epoch = 0
-    lr = 10e-3
+    lr = 1e-3
     # 初始化网络
     net = CNN()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -99,8 +100,8 @@ if __name__ == '__main__':
     label_list = os.listdir(path)
     image_list = os.listdir(image_path)
     train_loss = []
-    # net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
-    # optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
+    net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
+    optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     while True:
