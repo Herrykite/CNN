@@ -9,11 +9,13 @@ from ConvNet.cnn import CNN
 from ConvNet.preprocess_data import get_vertics, mkdir
 from sklearn.metrics import mean_squared_error
 
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-def save(number):
+
+def save(number, testnumber):
     mkdir('./CNN_output_parameter')
     torch.save(net.state_dict(), './CNN_output_parameter/' + str(number + 1) + '_CNN.pkl')
-    torch.save(optimizer.state_dict(), './CNN_output_parameter/opt.pkl')
+    torch.save(optimizer.state_dict(), './CNN_output_parameter/' + str(testnumber) + '_opt.pkl')
     print('\n网络参数已保存!\n')
 
 
@@ -56,11 +58,13 @@ def proofread(number):
         predict = predict[0].cpu().numpy()
         vertics, faces = loadObj(path + label_list[rand])
         for order in range(len(predict) // 3):
-            pre_vertics.append([predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
+            pre_vertics.append(
+                [predict[order], predict[order + len(predict) // 3], predict[order + len(predict) // 3 * 2]])
             loss += mean_squared_error(vertics[order], pre_vertics[order])
         print('测试图片输出数据Loss =', loss)
         mkdir('./CNN_test_output')
         writeObj('./CNN_test_output/' + str(number) + '_test.obj', pre_vertics, faces)
+        return rand
 
 
 def draw_train_process(title, i, loss, label):
@@ -72,42 +76,43 @@ def draw_train_process(title, i, loss, label):
     plt.show()
 
 
-def adjust_learning_rate(leaning_rate, number):
-    if leaning_rate > 1e-6:
-        leaning_rate -= leaning_rate * (0.01 ** (number // 30))
+def adjust_learning_rate(number):
+    if number < 100:
+        learning = 1e-3
+    elif number > 10000:
+        learning = 1e-5
     else:
-        leaning_rate = 1e-6
+        learning = 1 / 10 * number
     for param_group in optimizer.param_groups:
-        param_group['lr'] = leaning_rate
-    print('学习率已更新为：', leaning_rate)
+        param_group['lr'] = learning
+    print('学习率已更新为：', learning)
+    return learning
 
 
 if __name__ == '__main__':
     epoch = 0
-    lr = 1e-3
     # 初始化网络
     net = CNN()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net = net.to(device)
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     # 定义损失函数：交叉熵或MSE
     criterion = torch.nn.MSELoss()
     # 定义网络优化方法：Adam
-    optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
     # 定义路径
     path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
     image_path = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
     label_list = os.listdir(path)
     image_list = os.listdir(image_path)
     train_loss = []
-    # net.load_state_dict(torch.load('./CNN_saved_parameter/_CNN.pkl'))
-    # optimizer.load_state_dict(torch.load('./CNN_saved_parameter/opt.pkl'))
+    net.load_state_dict(torch.load('./CNN_saved_parameter/21_CNN.pkl'))
+    optimizer.load_state_dict(torch.load('./CNN_saved_parameter/21_opt.pkl'))
     image_address = DataSet(image_path)
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     while True:
         train(epoch)
-        proofread(epoch)
+        test_number = proofread(epoch)
         if epoch % 10 == 0:
-            save(epoch)
-        adjust_learning_rate(lr, epoch)
+            save(epoch, test_number)
+        lr = adjust_learning_rate(epoch)
         epoch += 1
