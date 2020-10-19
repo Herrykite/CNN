@@ -12,10 +12,10 @@ from sklearn.metrics import mean_squared_error
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
-def save(number, testnumber):
+def save(number):
     mkdir('./CNN_output_parameter')
     torch.save(net.state_dict(), './CNN_output_parameter/' + str(number + 1) + '_CNN.pkl')
-    torch.save(optimizer.state_dict(), './CNN_output_parameter/' + str(testnumber) + '_opt.pkl')
+    torch.save(optimizer.state_dict(), './CNN_output_parameter/_opt.pkl')
     print('\n网络参数已保存!\n')
 
 
@@ -43,7 +43,7 @@ def train(number):
             draw_train_process('The Training Process', iters, train_loss, 'Loss')
 
 
-def proofread(number):
+def proofread():
     net.eval()  # 必须有此句，否则有输入数据，即使不训练也会改变权值。
     pre_vertics = []
     loss = 0
@@ -63,8 +63,7 @@ def proofread(number):
             loss += mean_squared_error(vertics[order], pre_vertics[order])
         print('测试图片输出数据Loss =', loss)
         mkdir('./CNN_test_output')
-        writeObj('./CNN_test_output/' + str(number) + '_test.obj', pre_vertics, faces)
-        return rand
+        writeObj('./CNN_test_output/' + str(rand) + '_test.obj', pre_vertics, faces)
 
 
 def draw_train_process(title, i, loss, label):
@@ -111,8 +110,8 @@ if __name__ == '__main__':
     loader = DataLoader(image_address, batch_size=128, shuffle=True)
     while True:
         train(epoch)
-        test_number = proofread(epoch)
+        proofread()
         if epoch % 10 == 0:
-            save(epoch, test_number)
+            save(epoch)
         lr = adjust_learning_rate(epoch)
         epoch += 1
