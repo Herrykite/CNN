@@ -33,21 +33,14 @@ loader = DataLoader(DataSet(image_path), batch_size=cfg.INPUT.BATCH_SIZE, shuffl
 
 def train(number):
     net.train()
-    for i, (images, index) in enumerate(loader, start=1):
-        vertics = []  # 每一批Batch以后重置Obj获取的顶点
+    for i, (images, labels) in enumerate(loader, start=1):  # index为所采用图片的位序，对应.obj的文件名
         start = time.time()
-        for batch in range(len(images)):  # images为图片数据，index为图片索引数组，images大小为128*1*240*320
-            vertics.append(get_vertics(index[0][batch]))
-        end = time.time()
-        print('第', i, '次用时为: ', end-start)
         images = images.to(device)
-        labels = torch.tensor(vertics)
         labels = labels.to(device)
-        print('第', number + 1, '轮   第', i, '组：')
-        print('初始数据：\n', labels)
+        # print('初始数据：\n', labels)
         optimizer.zero_grad()
         output = net(images)  # 网络前向运行
-        print('预测值：\n', output, )
+        print('预测值：\n', output)
         loss = criterion(output, labels)  # 计算网络的损失函数
         print('Loss =', loss.item() / cfg.INPUT.BATCH_SIZE)
         train_loss.append(loss.item() / cfg.INPUT.BATCH_SIZE)
@@ -56,6 +49,8 @@ def train(number):
         iters = range(len(train_loss))
         if len(train_loss) % 90 == 0:
             draw_train_process(cfg.VISUAL.TITLE, iters, train_loss, cfg.VISUAL.LINE_LABEL)
+        end = time.time()
+        print('第', number + 1, '轮  第', i, '次用时为: ', end - start)
 
 
 def proofread():
@@ -104,8 +99,8 @@ def adjust_learning_rate(number):
 
 def run():
     epoch = cfg.INPUT.BASE_EPOCH
-    net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
-    optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
+    # net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
+    # optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
     while True:
         train(epoch)
         proofread()

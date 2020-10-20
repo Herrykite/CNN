@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 from torchvision import transforms
 from ConvNet.config.defaults import get_cfg_defaults
+from ConvNet.tools.preprocess_data import get_vertics
 
 cfg = get_cfg_defaults()
 transform = transforms.Compose([
@@ -26,17 +27,15 @@ class DataSet(data.Dataset):
 
     def __getitem__(self, item):
         img_path = self.images[item]
-        item_set = []
-        np.array(item_set)
-        item_set.append(item)
-        # print('Item:', item_set, img_path)
         figure = Image.open(img_path).convert('L')
+        label = get_vertics(item)
         if self.transforms:
             img_data = self.transforms(figure)
         else:
             figure = np.asarray(figure)
             img_data = torch.from_numpy(figure)
-        return img_data, item_set
+        lab_data = torch.from_numpy(label)
+        return img_data, lab_data
 
     def __len__(self):
         return len(self.images)
