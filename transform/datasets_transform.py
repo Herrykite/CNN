@@ -6,6 +6,7 @@ import numpy as np
 from torchvision import transforms
 from ConvNet.config.defaults import get_cfg_defaults
 from ConvNet.tools.preprocess_data import get_vertics
+from ConvNet.tools.deal_with_obj import writeObj
 
 cfg = get_cfg_defaults()
 transform = transforms.Compose([
@@ -17,28 +18,43 @@ transform = transforms.Compose([
     # 标准化至[-1,1]
 ])
 
+restore = transforms.Compose([
+    transforms.Normalize(mean=-1, std=2),
+    transforms.ToPILImage()
+])
+
 
 class DataSet(data.Dataset):
     def __init__(self, root):
         # 所有图片的绝对路径
         images = os.listdir(root)
+        images.sort(key=lambda obj: len(obj))
         self.images = [os.path.join(root, k) for k in images]
         self.transforms = transform
 
     def __getitem__(self, item):
         img_path = self.images[item]
         figure = Image.open(img_path).convert('L')
-        label = get_vertics(item)
+        label, faces = get_vertics(item)
         if self.transforms:
             img_data = self.transforms(figure)
         else:
             figure = np.asarray(figure)
             img_data = torch.from_numpy(figure)
         lab_data = torch.from_numpy(label)
-        return img_data, lab_data
+        # check_before_train(img_data, lab_data, faces, item)
+        return img_data, lab_data, faces
 
     def __len__(self):
         return len(self.images)
+
+
+def check_before_train(images, labels, faces, item):
+    restore(images).convert('L')
+    vertics = []
+    for i in range(len(labels) // 3):
+        vertics.append([labels[i], labels[i + len(labels) // 3], labels[i + 2*len(labels) // 3]])
+    writeObj(cfg.INPUT.CHECK + str(item) + '_check.obj', vertics, faces)
 
 
 class SingleTest:
