@@ -17,14 +17,13 @@ cfg = get_cfg_defaults()
 # 神经网络初始化
 net = CNN()
 net.apply(conv_init)
-device = torch.device(cfg.MODEL.DEVICE1 if torch.cuda.is_available() else cfg.MODEL.DEVICE2)
-net = net.to(device)
+net = net.to(cfg.MODEL.DEVICE1)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
 # 定义路径
-label_path = cfg.INPUT.VERTICS_PATH_MINI
-image_path = cfg.INPUT.IMAGES_PATH_MINI
+label_path = cfg.INPUT.VERTICS_PATH
+image_path = cfg.INPUT.IMAGES_PATH
 label_list = os.listdir(label_path)
 label_list.sort(key=lambda x: len(x))
 image_list = os.listdir(image_path)
@@ -36,20 +35,20 @@ loader = DataLoader(DataSet(image_path), batch_size=cfg.INPUT.BATCH_SIZE, shuffl
 
 def train(number):
     net.train()
-    for i, (images, labels, faces) in enumerate(loader, start=1):  # index为所采用图片的位序，对应.obj的文件名
+    for i, (images, labels) in enumerate(loader, start=1):  # index为所采用图片的位序，对应.obj的文件名
         start = time.time()
         images = images.to(device)
         labels = labels.to(device)
         optimizer.zero_grad()
         output = net(images)  # 网络前向运行
-        print('predictive labels：\n', output)
+        print('epoch:', number+1, '  batch:', i, '\npredictive labels：\n', output)
         loss = criterion(output, labels)  # 计算网络的损失函数
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
-            print('Loss =', loss.item() / cfg.INPUT.BATCH_SIZE, file=f)
-        train_loss.append(loss.item() / cfg.INPUT.BATCH_SIZE)
+            print('Loss =', loss.item(), file=f)
+        train_loss.append(loss.item())
         loss.backward()  # 反向传播梯度
         optimizer.step()  # 优化更新权重
-        if len(train_loss) % 450 == 0:
+        if len(train_loss) % 100 == 0 and len(train_loss) < 30000:
             iters = range(len(train_loss))
             draw_train_process(cfg.VISUAL.TITLE, iters, train_loss, cfg.VISUAL.LINE_LABEL)
         end = time.time()
@@ -104,8 +103,10 @@ def adjust_learning_rate(number):
 
 def run():
     epoch = cfg.INPUT.BASE_EPOCH
-    # net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
-    # optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
+    net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
+    print('loaded net successfully!')
+    optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
+    print('loaded optimizer successfully!')
     while True:
         train(epoch)
         proofread()
