@@ -17,7 +17,8 @@ cfg = get_cfg_defaults()
 # 神经网络初始化
 net = CNN()
 net.apply(conv_init)
-net = net.to(cfg.MODEL.DEVICE1)
+device = cfg.MODEL.DEVICE1
+net = net.to(device)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
