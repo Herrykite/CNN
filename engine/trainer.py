@@ -35,7 +35,6 @@ loader = DataLoader(DataSet(image_path), batch_size=cfg.INPUT.BATCH_SIZE, shuffl
 
 
 def train(number):
-    net.train()
     for i, (images, labels) in enumerate(loader, start=1):  # index为所采用图片的位序，对应.obj的文件名
         start = time.time()
         images = images.to(device)
@@ -84,8 +83,10 @@ def proofread():
 
 def save(number):
     mkdir(cfg.OUTPUT.PARAMETER)
-    torch.save(net.state_dict(), cfg.OUTPUT.PARAMETER + '/' + str(number + 1) + '_CNN.pkl')
-    torch.save(optimizer.state_dict(),  cfg.OUTPUT.PARAMETER + '/' + str(number + 1) + '_opt.pkl')
+    torch.save(net.state_dict(), cfg.OUTPUT.PARAMETER + '/' + str(number + 1) + '_CNN.pkl',
+               _use_new_zipfile_serialization=False)
+    torch.save(optimizer.state_dict(),  cfg.OUTPUT.PARAMETER + '/' + str(number + 1) + '_opt.pkl',
+               _use_new_zipfile_serialization=False)
     print('\n网络参数已保存!\n')
 
 
