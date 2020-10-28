@@ -15,7 +15,8 @@ _C.MODEL.DEVICE2 = 'cpu'
 # -----------------------------------------------------------------------------
 
 _C.DATASETS = CfgNode()
-_C.DATASETS.SAVE_INTERVAL = 500
+_C.DATASETS.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
+_C.DATASETS.SAVE_INTERVAL = 1000
 # 保存参数轮次间隔
 _C.DATASETS.TRANSFORM_RESIZE = 240
 # 统一缩放
@@ -53,6 +54,7 @@ _C.DATASETS.RANDOMERASING_VALUE = 0
 # ---------------------------------------------------------------------------- #
 
 _C.SOLVER = CfgNode()
+_C.SOLVER.NUM_WORKERS = 8
 _C.SOLVER.BASE_LR = 1e-3
 _C.SOLVER.ADJUST_LR = 1e-5
 _C.SOLVER.FIRST_ADJUST_LIMIT = 100
@@ -76,14 +78,15 @@ _C.VISUAL.LINE_LABEL = 'Loss'
 
 _C.INPUT = CfgNode()
 _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
-_C.INPUT.VERTICS_PATH_MINI = 'D:/DIGISKY/CNNTEST/labels/'
+# _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNNTEST/labels/'
 _C.INPUT.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
-_C.INPUT.IMAGES_PATH_MINI = 'D:/DIGISKY/CNNTEST/images/'
+# _C.INPUT.IMAGES_PATH = 'D:/DIGISKY/CNNTEST/images/'
 _C.INPUT.INITIALIZE_NET = '../output/CNN_saved_parameter/_CNN.pkl'
 _C.INPUT.INITIALIZE_OPTIMIZER = '../output/CNN_saved_parameter/opt.pkl'
 _C.INPUT.CHECK = '../output/check/'
-_C.INPUT.BATCH_SIZE = 2
+_C.INPUT.BATCH_SIZE = 8
 _C.INPUT.BASE_EPOCH = 0
+
 
 # ---------------------------------------------------------------------------- #
 # Output
@@ -94,13 +97,13 @@ _C.OUTPUT = CfgNode()
 _C.OUTPUT.PARAMETER = '../output/CNN_output_parameter'
 # 数据预处理后的读取地址
 _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data'
-_C.OUTPUT.CNN_INITIAL_DATA_PATH_MINI = '../output/CNN_output_data_MINI'
+# _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data_MINI'
 # 数据预处理所需的.json模板
 _C.OUTPUT.CNN_FORMAT_JSON_FILENAME = 'CNN_Format_Camera2.data'
 # 加载模型网络参数的文件名
-_C.OUTPUT.SAVE_NET_FILENAME = '/1001_CNN.pkl'
+_C.OUTPUT.SAVE_NET_FILENAME = '/1_CNN.pkl'
 # 加载模型优化器参数的文件名
-_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/1001_opt.pkl'
+_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/1_opt.pkl'
 # 记录打印内容
 _C.OUTPUT.LOGGING = '../output/log.txt'
 
