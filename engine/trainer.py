@@ -24,7 +24,7 @@ criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
 # 定义路径
 label_path = cfg.INPUT.VERTICS_PATH
-image_path = cfg.INPUT.IMAGES_PATH
+image_path = cfg.DATASETS.SAVE_RESIZE_IMAGES
 label_list = os.listdir(label_path)
 label_list.sort(key=lambda x: len(x))
 image_list = os.listdir(image_path)
