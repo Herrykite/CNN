@@ -6,7 +6,7 @@ from ConvNet.tools.deal_with_obj import loadObj
 from ConvNet.config.defaults import get_cfg_defaults
 
 cfg = get_cfg_defaults()
-path = cfg.OUTPUT.CNN_INITIAL_DATA_PATH_MINI
+path = cfg.OUTPUT.CNN_INITIAL_DATA_PATH
 
 
 def mkdir(creat_path):
@@ -37,14 +37,17 @@ def Woodblock(order, data):  # 活字印刷术
 
 
 def initial_load():
-    input_path = cfg.INPUT.VERTICS_PATH_MINI
+    input_path = cfg.INPUT.VERTICS_PATH
     file_list = os.listdir(input_path)
     file_list.sort(key=lambda x: len(x))
+    mkdir(cfg.OUTPUT.CNN_INITIAL_DATA_PATH)
     for count in range(len(file_list)):
         datas = []
         if file_list[count].endswith('.obj'):
             vertics, faces = loadObj(input_path + file_list[count])
             datas.append([vertics, faces])
+            print(count, '.obj finished')
+
         Woodblock(count, datas)  # 此句执行完以后均存储为.data文件
 
 
@@ -58,5 +61,4 @@ def get_vertics(count):
 
 
 if __name__ == '__main__':
-    mkdir(cfg.OUTPUT.CNN_INITIAL_DATA_PATH_MINI)
     initial_load()
