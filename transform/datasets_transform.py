@@ -11,7 +11,7 @@ from ConvNet.tools.deal_with_obj import writeObj
 
 cfg = get_cfg_defaults()
 transform = transforms.Compose([
-    transforms.ColorJitter(brightness=(0.66667, 1.5), contrast=(0.83333, 1.2),
+    transforms.ColorJitter(brightness=(0.75, 1.5), contrast=(0.83333, 1.2),
                            saturation=(0.83333, 1.2), hue=(-0.2, 0.2)),
     transforms.RandomRotation(5),
     transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.95, 1.05), shear=(-5, 5, -5, 5)),
@@ -45,8 +45,8 @@ class DataSet(data.Dataset):
             img_data = torch.from_numpy(figure)
         lab_data = torch.from_numpy(label)
         # 下两行用于训练前测试标签与输入是否相互对应，正式训练时注释
-        # check_before_train(img_data, lab_data, faces, item)
-        # restore(img_data).show()
+        check_before_train(img_data, lab_data, faces, item)
+        restore(img_data).show()
         return img_data, lab_data
 
     def __len__(self):
