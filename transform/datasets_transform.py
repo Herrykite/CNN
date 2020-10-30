@@ -11,11 +11,12 @@ from ConvNet.tools.deal_with_obj import writeObj
 
 cfg = get_cfg_defaults()
 transform = transforms.Compose([
-    transforms.ColorJitter(brightness=(0.5, 1.5), contrast=(0.8, 1.2), saturation=(0.8, 1.2), hue=(-0.2, 0.2)),
+    transforms.ColorJitter(brightness=(0.66667, 1.5), contrast=(0.83333, 1.2),
+                           saturation=(0.83333, 1.2), hue=(-0.2, 0.2)),
     transforms.RandomRotation(5),
     transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.95, 1.05), shear=(-5, 5, -5, 5)),
     transforms.ToTensor(),
-    transforms.RandomErasing(p=1, scale=(0.001, 0.01), ratio=(0.5, 2.0), value=0),
+    transforms.RandomErasing(p=0.5, scale=(0.001, 0.01), ratio=(0.5, 2.0), value=0),
     transforms.Normalize(mean=0.3156022930958101, std=0.28214540372352737)
 ])
 
