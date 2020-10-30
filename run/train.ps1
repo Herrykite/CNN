@@ -1,4 +1,4 @@
-cd \\192.168.20.63\ai\wanghairui\ConvNet\tools
+cd 'D:\Program Files\JetBrains\Python Project\ConvNet\tools'
 python initial_path.py
-cd \\192.168.20.63\ai\wanghairui\ConvNet\engine
+cd 'D:\Program Files\JetBrains\Python Project\ConvNet\engine'
 python trainer.py

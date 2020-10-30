@@ -1,2 +1,4 @@
-cd \\192.168.20.63\ai\wanghairui\ConvNet\tools
+cd 'D:\Program Files\JetBrains\Python Project\ConvNet\tools'
 python preprocess_data.py
+python resize_image.py
+python python preprocess_data.py
