@@ -47,7 +47,6 @@ def initial_load():
             vertics, faces = loadObj(input_path + file_list[count])
             datas.append([vertics, faces])
             print(count, '.obj finished')
-
         Woodblock(count, datas)  # 此句执行完以后均存储为.data文件
 
 
