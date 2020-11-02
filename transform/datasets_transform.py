@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import math
 import os
 import torch
@@ -16,7 +17,6 @@ transform = transforms.Compose([
     transforms.RandomRotation(5),
     transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.95, 1.05), shear=(-5, 5, -5, 5)),
     transforms.ToTensor(),
-    transforms.RandomErasing(p=0.5, scale=(0.001, 0.01), ratio=(0.5, 2.0), value=0),
     transforms.Normalize(mean=0.3156022930958101, std=0.28214540372352737)
 ])
 
@@ -45,8 +45,8 @@ class DataSet(data.Dataset):
             img_data = torch.from_numpy(figure)
         lab_data = torch.from_numpy(label)
         # 下两行用于训练前测试标签与输入是否相互对应，正式训练时注释
-        check_before_train(img_data, lab_data, faces, item)
-        restore(img_data).show()
+        # check_before_train(img_data, lab_data, faces, item)
+        # restore(img_data).show()
         return img_data, lab_data
 
     def __len__(self):
