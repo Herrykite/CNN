@@ -16,6 +16,7 @@ _C.MODEL.DEVICE2 = 'cpu'
 
 _C.DATASETS = CfgNode()
 _C.DATASETS.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
+# _C.DATASETS.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNNTEST/images/'
 _C.DATASETS.SAVE_INTERVAL = 1000
 # 保存参数轮次间隔
 _C.DATASETS.TRANSFORM_RESIZE = 240
@@ -75,12 +76,10 @@ _C.VISUAL.LINE_LABEL = 'Loss'
 # ---------------------------------------------------------------------------- #
 
 _C.INPUT = CfgNode()
-_C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
+# _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
 # _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNNTEST/labels/'
+_C.INPUT.VERTICS_PATH = '../output/CNN_input_obj/'
 _C.INPUT.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/c2_rot/'
-# _C.INPUT.IMAGES_PATH = 'D:/DIGISKY/CNNTEST/images/'
-_C.INPUT.INITIALIZE_NET = '../output/CNN_saved_parameter/old_CNN.pkl'
-_C.INPUT.INITIALIZE_OPTIMIZER = '../output/CNN_saved_parameter/old_opt.pkl'
 _C.INPUT.CHECK = '../output/check/'
 _C.INPUT.BATCH_SIZE = 128
 _C.INPUT.BASE_EPOCH = 0
@@ -99,9 +98,9 @@ _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data'
 # 数据预处理所需的.json模板
 _C.OUTPUT.CNN_FORMAT_JSON_FILENAME = 'CNN_Format_Camera2.data'
 # 加载模型网络参数的文件名
-_C.OUTPUT.SAVE_NET_FILENAME = '/old_CNN.pkl'
+_C.OUTPUT.SAVE_NET_FILENAME = '/2001_CNN.pkl'
 # 加载模型优化器参数的文件名
-_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/old_opt.pkl'
+_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/2001_opt.pkl'
 # 记录打印内容
 _C.OUTPUT.LOGGING = '../output/log.txt'
 
