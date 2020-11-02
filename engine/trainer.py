@@ -1,10 +1,13 @@
+# -*- coding: UTF-8 -*-
+# import sys
+# sys.path.insert(0, '/home/digisky/wanghairui')
 import os
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from ConvNet.tools.deal_with_obj import loadObj, writeObj
 from ConvNet.transform.datasets_transform import DataSet, SingleTest
-from ConvNet.modeling.cnn import CNN, conv_init
+from ConvNet.modeling.newcnn import CNN, conv_init
 from ConvNet.tools.preprocess_data import mkdir
 from ConvNet.tools.draw import draw_train_process
 from ConvNet.config.defaults import get_cfg_defaults
@@ -45,6 +48,7 @@ def train(number):
         loss = criterion(output, labels)  # 计算网络的损失函数
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('Loss =', loss.item(), file=f)
+        print('Loss =', loss.item())
         train_loss.append(loss.item())
         loss.backward()  # 反向传播梯度
         optimizer.step()  # 优化更新权重
@@ -78,7 +82,7 @@ def proofread():
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('测试图片输出数据Loss =', loss, file=f)
         mkdir(cfg.TEST.SAVE_OBJ)
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + str(rand) + '_test.obj', pre_vertics, faces)
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
 
 
 def save(number):
