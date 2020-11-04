@@ -92,7 +92,7 @@ def proofread():
             print('测试图片输出数据Loss =', loss.item(), file=f)
     # 输出为.obj文件
     mkdir(cfg.TEST.SAVE_OBJ)
-    predict = predict[0].cpu().numpy()
+    predict = predict.cpu().numpy()
     pre_vertics = []
     for order in range(len(predict) // cfg.TEST.VERTICS_DIMENSION):
         pre_vertics.append([predict[order], predict[order + len(predict) // cfg.TEST.VERTICS_DIMENSION],
