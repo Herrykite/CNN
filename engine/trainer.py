@@ -115,7 +115,7 @@ def adjust_learning_rate(number):
     elif number > cfg.SOLVER.SECOND_ADJUST_LIMIT:
         learning = cfg.SOLVER.ADJUST_LR
     else:
-        learning = 1 / (10 * number)
+        learning = 1 / (100 * number)
     for param_group in optimizer.param_groups:
         param_group['lr'] = learning
     with open(cfg.OUTPUT.LOGGING, 'a') as f:
