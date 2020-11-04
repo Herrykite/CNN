@@ -12,7 +12,6 @@ from torchvision.models.resnet import resnet34, BasicBlock
 from ConvNet.tools.preprocess_data import mkdir, get_vertics
 from ConvNet.tools.draw import draw_train_process
 from ConvNet.config.defaults import get_cfg_defaults
-from sklearn.metrics import mean_squared_error
 import time
 import gc
 
