@@ -5,11 +5,11 @@ import os
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
-from ConvNet.tools.deal_with_obj import loadObj, writeObj
+from ConvNet.tools.deal_with_obj import writeObj
 from ConvNet.transform.datasets_transform import DataSet, SingleTest
 from ConvNet.modeling.cnn import CNN
 from torchvision.models.resnet import resnet34, BasicBlock
-from ConvNet.tools.preprocess_data import mkdir
+from ConvNet.tools.preprocess_data import mkdir, get_vertics
 from ConvNet.tools.draw import draw_train_process
 from ConvNet.config.defaults import get_cfg_defaults
 from sklearn.metrics import mean_squared_error
@@ -76,7 +76,6 @@ def train(number):
 
 def proofread():
     net.eval()  # 必须有此句，否则有输入数据，即使不训练也会改变权值。
-    pre_vertics = []
     rand = np.random.randint(0, len(image_list))
     with open(cfg.OUTPUT.LOGGING, 'a') as f:
         print('测试图片为:', image_list[rand], '\n对应Obj为：', label_list[rand], file=f)
@@ -85,18 +84,14 @@ def proofread():
     image = image.expand(cfg.TEST.IMAGE_BATCH, cfg.TEST.IMAGE_CHANNEL, cfg.TEST.IMAGE_LENGTH, cfg.TEST.IMAGE_HEIGHT)
     image = image.to(device)
     with torch.no_grad():
-        predict = net(image)
-        predict = predict[0].cpu().numpy()
-        vertics, faces = loadObj(label_path + label_list[rand])
-        for order in range(len(predict) // cfg.TEST.VERTICS_DIMENSION):
-            pre_vertics.append(
-                [predict[order], predict[order + len(predict) // cfg.TEST.VERTICS_DIMENSION],
-                 predict[order + len(predict) // cfg.TEST.VERTICS_DIMENSION * 2]])
-        loss = mean_squared_error(vertics, pre_vertics)
+        predict = net(image)[0]
+        vertics, faces = get_vertics(rand)
+        vertics = torch.Tensor(vertics).to(device)
+        loss = criterion(vertics, predict)
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
-            print('测试图片输出数据Loss =', loss, file=f)
+            print('测试图片输出数据Loss =', loss.item(), file=f)
         mkdir(cfg.TEST.SAVE_OBJ)
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], predict, faces)
 
 
 def save(number):
