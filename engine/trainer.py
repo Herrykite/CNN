@@ -74,7 +74,8 @@ def train(number):
 
 
 def proofread():
-    net.eval()  # 必须有此句，否则有输入数据，即使不训练也会改变权值。
+    # 开始测试。此句是防止改变权值。
+    net.eval()
     rand = np.random.randint(0, len(image_list))
     with open(cfg.OUTPUT.LOGGING, 'a') as f:
         print('测试图片为:', image_list[rand], '\n对应Obj为：', label_list[rand], file=f)
@@ -89,8 +90,14 @@ def proofread():
         loss = criterion(vertics, predict)
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('测试图片输出数据Loss =', loss.item(), file=f)
-        mkdir(cfg.TEST.SAVE_OBJ)
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], predict, faces)
+    # 输出为.obj文件
+    mkdir(cfg.TEST.SAVE_OBJ)
+    predict = predict[0].cpu().numpy()
+    pre_vertics = []
+    for order in range(len(predict) // cfg.TEST.VERTICS_DIMENSION):
+        pre_vertics.append([predict[order], predict[order + len(predict) // cfg.TEST.VERTICS_DIMENSION],
+                            predict[order + len(predict) // cfg.TEST.VERTICS_DIMENSION * 2]])
+    writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
 
 
 def save(number):
