@@ -45,7 +45,7 @@ class CNN(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        print('输入图片卷积前大小：', x.size())
+        print('Image size before convolution processing：', x.size())
         x = self.conv(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -55,7 +55,7 @@ class CNN(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.avgpool(x)
-        print('输入图片卷积后大小：', x.size())
+        print('Image size after convolution processing：', x.size())
         # 在第一个全连接层与卷积层连接的位置需要将特征图拉成一个一维向量
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
