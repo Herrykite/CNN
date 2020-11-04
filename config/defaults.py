@@ -56,7 +56,7 @@ _C.SOLVER = CfgNode()
 _C.SOLVER.NUM_WORKERS = 8
 _C.SOLVER.BASE_LR = 1e-3
 _C.SOLVER.ADJUST_LR = 1e-5
-_C.SOLVER.FIRST_ADJUST_LIMIT = 100
+_C.SOLVER.FIRST_ADJUST_LIMIT = 10
 _C.SOLVER.SECOND_ADJUST_LIMIT = 10000
 
 # ---------------------------------------------------------------------------- #
@@ -76,9 +76,9 @@ _C.VISUAL.LINE_LABEL = 'Loss'
 # ---------------------------------------------------------------------------- #
 
 _C.INPUT = CfgNode()
-# _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
+_C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
 # _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNNTEST/labels/'
-_C.INPUT.VERTICS_PATH = '../output/CNN_input_obj/'
+# _C.INPUT.VERTICS_PATH = '../output/CNN_input_obj/'
 _C.INPUT.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
 # _C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNNTEST/images/'
 _C.INPUT.CHECK = '../output/check/'
