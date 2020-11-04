@@ -131,7 +131,7 @@ def run():
     while True:
         train(epoch)
         proofread()
-        if epoch % cfg.DATASETS.SAVE_INTERVAL == 0:
+        if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
             save(epoch)
         adjust_learning_rate(epoch)
         epoch += 1
