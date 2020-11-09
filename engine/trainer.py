@@ -4,50 +4,53 @@
 import os
 import torch
 import numpy as np
+import torchvision
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from ConvNet.tools.deal_with_obj import writeObj
 from ConvNet.transform.datasets_transform import DataSet, SingleTest
-from ConvNet.modeling.cnn import CNN
-from torchvision.models.resnet import resnet34, BasicBlock
+# from ConvNet.modeling.cnn import CNN
+# from torchvision.models.resnet import resnet50, Bottleneck
+from ConvNet.modeling.newcnn import CNN
 from ConvNet.tools.preprocess_data import mkdir, get_vertics
-from ConvNet.tools.draw import draw_train_process
+# from ConvNet.tools.draw import draw_train_process
 from ConvNet.config.defaults import get_cfg_defaults
 import time
-import gc
 
 # 调用配置文件
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 cfg = get_cfg_defaults()
 # 神经网络初始化
-net = resnet34(pretrained=True)
-cnn = CNN(BasicBlock, [3, 4, 6, 3])
-model_dict = cnn.state_dict()
-pretrained_dict = {k: v for k, v in net.state_dict().items() if k in model_dict}
-model_dict.update(pretrained_dict)
-cnn.load_state_dict(model_dict)
-net = cnn
+# net = resnet50(pretrained=True)
+# cnn = CNN(Bottleneck, [3, 4, 6, 3])
+# model_dict = cnn.state_dict()
+# pretrained_dict = {k: v for k, v in net.state_dict().items() if k in model_dict}
+# model_dict.update(pretrained_dict)
+# cnn.load_state_dict(model_dict)
+# net = cnn
+net = CNN()
 # 检查可训练的参数
 for name, param in net.named_parameters():
     if param.requires_grad:
         print(name)
-del name, param, cnn, pretrained_dict, model_dict
-gc.collect()
-# net.apply(conv_init)
 device = cfg.MODEL.DEVICE1
 net = net.to(device)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=cfg.SOLVER.BASE_LR)
+optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.ADJUST_LR)
+optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
+print('loaded optimizer successfully!')
 # 定义路径
 label_path = cfg.INPUT.VERTICS_PATH
 image_path = cfg.INPUT.SAVE_RESIZE_IMAGES
 label_list = os.listdir(label_path)
-label_list.sort(key=lambda x: len(x))
+label_list.sort(key=lambda x: int(x[:-4]))
 image_list = os.listdir(image_path)
-image_list.sort(key=lambda x: len(x))
+image_list.sort(key=lambda x: int(x[:-4]))
 
 train_loss = []
 loader = DataLoader(DataSet(image_path), batch_size=cfg.INPUT.BATCH_SIZE, shuffle=True)
+# tb = SummaryWriter('./')
 
 
 def train(number):
@@ -56,18 +59,19 @@ def train(number):
         images = images.to(device)
         labels = labels.to(device)
         output = net(images)  # 网络前向运行
-        print('epoch:', number+1, '  batch:', i, '\npredictive labels：\n', output)
+        print('epoch:', number, '  batch:', i, '\npredictive labels：\n', output)
         loss = criterion(output, labels)  # 计算网络的损失函数
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('Loss =', loss.item(), file=f)
         print('Loss =', loss.item())
         train_loss.append(loss.item())
+        # TensorBoard(images, loss, number * cfg.INPUT.BATCH_SIZE + i)
         optimizer.zero_grad()
         loss.backward()  # 反向传播梯度
         optimizer.step()  # 优化更新权重
-        if len(train_loss) % 100 == 0 and len(train_loss) < 30000:
-            iters = range(len(train_loss))
-            draw_train_process(cfg.VISUAL.TITLE, iters, train_loss, cfg.VISUAL.LINE_LABEL)
+        # if len(train_loss) % 100 == 0 and len(train_loss) < 30000:
+        #     iters = range(len(train_loss))
+        #     draw_train_process(cfg.VISUAL.TITLE, iters, train_loss, cfg.VISUAL.LINE_LABEL)
         end = time.time()
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('第', number + 1, '轮  第', i, '次用时为: ', end - start, file=f)
@@ -100,6 +104,50 @@ def proofread():
     writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
 
 
+# def TensorBoard(tb, images, loss, i):
+#     grid = torchvision.utils.make_grid(images)
+#     tb.add_image('Image', grid, 0)
+#     tb.add_graph(net, images)
+#     tb.add_scalar('Loss', loss, i)
+#     tb.add_histogram('conv1.weight', net.conv_net.conv1.weight)
+#     tb.add_histogram('bn2.weight', net.conv_net.bn2.weight)
+#     tb.add_histogram('bn2.bias', net.conv_net.bn2.bias)
+#     tb.add_histogram('conv3.weight', net.conv_net.conv3.weight)
+#     tb.add_histogram('conv3.bias', net.conv_net.conv3.bias)
+#     tb.add_histogram('bn4.weight', net.conv_net.bn4.weight)
+#     tb.add_histogram('bn4.bias', net.conv_net.bn4.bias)
+#     tb.add_histogram('conv5.weight', net.conv_net.conv5.weight)
+#     tb.add_histogram('conv5.bias', net.conv_net.conv5.bias)
+#     tb.add_histogram('bn6.weight', net.conv_net.bn6.weight)
+#     tb.add_histogram('bn6.bias', net.conv_net.bn6.bias)
+#     tb.add_histogram('conv7.weight', net.conv_net.conv7.weight)
+#     tb.add_histogram('conv7.bias', net.conv_net.conv7.bias)
+#     tb.add_histogram('bn8.weight', net.conv_net.bn8.weight)
+#     tb.add_histogram('bn8.bias', net.conv_net.bn8.bias)
+#     tb.add_histogram('conv9.weight', net.conv_net.conv9.weight)
+#     tb.add_histogram('conv9.bias', net.conv_net.conv9.bias)
+#     tb.add_histogram('bn10.weight', net.conv_net.bn10.weight)
+#     tb.add_histogram('bn10.bias', net.conv_net.bn10.bias)
+#     tb.add_histogram('conv11.weight', net.conv_net.conv11.weight)
+#     tb.add_histogram('conv11.bias', net.conv_net.conv11.bias)
+#     tb.add_histogram('bn12.weight', net.conv_net.bn12.weight)
+#     tb.add_histogram('bn12.bias', net.conv_net.bn12.bias)
+#     tb.add_histogram('fc.weight', net.fc.fc.weight)
+#     tb.add_histogram('fc.bias', net.fc.fc.bias)
+#     # tensorboard --logdir=./
+# def TensorBoard(images, loss, i):
+#     grid = torchvision.utils.make_grid(images)
+#     tb.add_image('Image', grid, 0)
+#     tb.add_graph(net, images)
+#     tb.add_scalar('Loss', loss, i)
+#     tb.add_histogram('conv.weight', net.conv.weight)
+#     tb.add_histogram('bn1.weight', net.bn1.weight)
+#     tb.add_histogram('bn1.bias', net.bn1.bias)
+#     tb.add_histogram('fc1.weight', net.fc1.weight)
+#     tb.add_histogram('fc1.bias', net.fc1.bias)
+#     # tensorboard --logdir=./
+
+
 def save(number):
     mkdir(cfg.OUTPUT.PARAMETER)
     torch.save(net.state_dict(), cfg.OUTPUT.PARAMETER + '/' + str(number + 1) + '_CNN.pkl',
@@ -124,18 +172,17 @@ def adjust_learning_rate(number):
 
 def run():
     epoch = cfg.INPUT.BASE_EPOCH
-    # net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
-    # print('loaded net successfully!')
-    # optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
-    # print('loaded optimizer successfully!')
+    net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
+    print('loaded net successfully!')
     while True:
+        adjust_learning_rate(epoch)
         train(epoch)
         proofread()
         if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
             save(epoch)
-        adjust_learning_rate(epoch)
         epoch += 1
 
 
 if __name__ == '__main__':
     run()
+
