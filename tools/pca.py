@@ -1,4 +1,5 @@
 import os
+import pickle
 import numpy as np
 from ConvNet.config.defaults import get_cfg_defaults
 from sklearn.decomposition import PCA
@@ -24,3 +25,7 @@ if __name__ == '__main__':
         feature_info[j] = sum(pca.explained_variance_ratio_[0:j])
     base_matrix = pca.components_
     data_reduction = pca.inverse_transform(pca_coefficient)
+    np.save('data.npy', data)
+    np.save('coefficient.npy', pca_coefficient)
+    file = open('pca.pkl', 'wb')
+    pickle.dump(pca, file)
