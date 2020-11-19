@@ -48,9 +48,9 @@ image_list.sort(key=lambda x: int(x[:-4]))
 
 train_loss = []
 loader = DataLoader(DataSet(image_path), batch_size=cfg.INPUT.BATCH_SIZE, shuffle=True)
-data = np.load('data.npy')
-pca = pickle.load(open('pca.pkl', 'rb'))
-pca_coefficient = np.load('coefficient.npy')
+data = np.load('../tools/data.npy')
+pca = pickle.load(open('../tools/pca.pkl', 'rb'))
+pca_coefficient = np.load('../tools/coefficient.npy')
 print('PCA data has been loaded!')
 
 
