@@ -1,43 +1,40 @@
-import numpy as np
+# -*- coding: UTF-8 -*-
 from collections import OrderedDict
 from torch import nn
-
-
-def conv_init(m):
-    classname = m.__class__.__name__
-    if classname.find('conv_net') != -1:
-        nn.init.kaiming_uniform_(m.weight, a=np.sqrt(3))
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
 
 
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         self.conv_net = nn.Sequential(OrderedDict([
-            ('conv1', nn.Conv2d(1, 64, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv2', nn.Conv2d(64, 64, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu2', nn.ReLU()),
+            ('conv1', nn.Conv2d(1, 64, kernel_size=(3, 3), stride=2, padding=1, bias=False)),
+            ('bn2', nn.BatchNorm2d(64)),
             ('conv3', nn.Conv2d(64, 96, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv4', nn.Conv2d(96, 96, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu4', nn.ReLU()),
+            ('bn4', nn.BatchNorm2d(96)),
+            ('relu1', nn.ReLU(inplace=True)),
             ('conv5', nn.Conv2d(96, 144, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv6', nn.Conv2d(144, 144, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu6', nn.ReLU()),
+            ('bn6', nn.BatchNorm2d(144)),
             ('conv7', nn.Conv2d(144, 216, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv8', nn.Conv2d(216, 216, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu8', nn.ReLU()),
+            ('bn8', nn.BatchNorm2d(216)),
+            ('relu2', nn.ReLU(inplace=True)),
             ('conv9', nn.Conv2d(216, 324, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv10', nn.Conv2d(324, 324, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu10', nn.ReLU()),
+            ('bn10', nn.BatchNorm2d(324)),
             ('conv11', nn.Conv2d(324, 486, kernel_size=(3, 3), stride=2, padding=1)),
-            ('conv12', nn.Conv2d(486, 486, kernel_size=(3, 3), stride=1, padding=1)),
-            ('relu12', nn.ReLU())
+            ('bn12', nn.BatchNorm2d(486)),
+            ('relu3', nn.ReLU(inplace=True))
             ]))
         self.dropout = nn.Dropout(p=0.2)
         self.fc = nn.Sequential(OrderedDict([
             ('fc', nn.Linear(9720, 22971))
         ]))
+
+        # for m in self.modules():
+        #     if isinstance(m, nn.Conv2d):
+        #         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+        #     elif isinstance(m, nn.BatchNorm2d):
+        #         # constant_用第二个参数值填充向量
+        #         nn.init.constant_(m.weight, 1)
+        #         nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         # print('输入图片卷积前大小：', x.size())
