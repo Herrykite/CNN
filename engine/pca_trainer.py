@@ -18,19 +18,9 @@ from ConvNet.config.defaults import get_cfg_defaults
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 cfg = get_cfg_defaults()
 # 神经网络初始化
-net = CNN()
-cnn = PCAnet()
-cnn.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
+net = PCAnet()
+net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
 print('loaded net successfully!')
-model_dict = cnn.state_dict()
-pretrained_dict = {k: v for k, v in net.state_dict().items() if k in model_dict}
-model_dict.update(pretrained_dict)
-cnn.load_state_dict(model_dict)
-net = cnn
-# 检查可训练的参数
-for name, param in net.named_parameters():
-    if param.requires_grad:
-        print(name)
 device = cfg.MODEL.DEVICE1
 net = net.to(device)
 # 定义损失函数与优化器参数
@@ -38,6 +28,10 @@ criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.ADJUST_LR)
 optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
 print('loaded optimizer successfully!')
+# 检查可训练的参数
+for name, param in net.named_parameters():
+    if param.requires_grad:
+        print(name)
 # 定义路径
 label_path = cfg.INPUT.VERTICS_PATH
 image_path = cfg.INPUT.SAVE_RESIZE_IMAGES
@@ -89,9 +83,9 @@ def proofread():
     with torch.no_grad():
         predict = net(image)[0]
         vertics, faces = get_vertics(rand)
-        vertics = torch.tensor(vertics.reshape(3, 7657).T.reshape(22971)).to(device)
+        vertics = torch.tensor(vertics.reshape(3, 7657).T.reshape(22971))
         predict = predict.cpu().numpy()
-        predict = torch.tensor(pca.inverse_transform(predict)).to(device)
+        predict = torch.tensor(pca.inverse_transform(predict))
         loss = criterion(vertics, predict)
         with open(cfg.OUTPUT.LOGGING, 'a') as f:
             print('Loss =', loss.item(), file=f)
@@ -100,6 +94,27 @@ def proofread():
     for order in range(len(predict) // 3):
         pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
     writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
+
+
+def whole_proofread():
+    net.eval()
+    for rand in range(len(image_list)):
+        print('测试图片为:', image_list[rand], '\n对应Obj为：', label_list[rand])
+        test = SingleTest(img_path=image_path + image_list[rand])
+        image = test.output_data(img_path=image_path + image_list[rand])
+        image = image.expand(cfg.TEST.IMAGE_BATCH, cfg.TEST.IMAGE_CHANNEL, cfg.TEST.IMAGE_LENGTH, cfg.TEST.IMAGE_HEIGHT)
+        image = image.to(device)
+        mkdir(cfg.TEST.SAVE_OBJ)
+        with torch.no_grad():
+            predict = net(image)[0]
+            vertics, faces = get_vertics(rand)
+            predict = predict.cpu().numpy()
+            predict = torch.tensor(pca.inverse_transform(predict))
+        # 输出为.obj文件
+        pre_vertics = []
+        for order in range(len(predict) // 3):
+            pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
 
 
 def save(number):
@@ -136,5 +151,5 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
-
+    # run()
+    whole_proofread()
