@@ -55,7 +55,7 @@ _C.DATASETS.RANDOMERASING_VALUE = 0
 _C.SOLVER = CfgNode()
 _C.SOLVER.NUM_WORKERS = 8
 _C.SOLVER.BASE_LR = 1e-3
-_C.SOLVER.ADJUST_LR = 1e-5
+_C.SOLVER.ADJUST_LR = 1e-6
 _C.SOLVER.FIRST_ADJUST_LIMIT = 10
 _C.SOLVER.SECOND_ADJUST_LIMIT = 10000
 
@@ -79,11 +79,11 @@ _C.INPUT = CfgNode()
 _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
 # _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNNTEST/labels/'
 # _C.INPUT.VERTICS_PATH = '../output/CNN_input_obj/'
-_C.INPUT.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
-# _C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNNTEST/images/'
+# _C.INPUT.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
+_C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_3082Dataset/images/'
 _C.INPUT.CHECK = '../output/check/'
-_C.INPUT.BATCH_SIZE = 8
-_C.INPUT.BASE_EPOCH = 33000
+_C.INPUT.BATCH_SIZE = 16
+_C.INPUT.BASE_EPOCH = 1
 
 
 # ---------------------------------------------------------------------------- #
@@ -99,9 +99,9 @@ _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data'
 # 数据预处理所需的.json模板
 _C.OUTPUT.CNN_FORMAT_JSON_FILENAME = 'CNN_Format_Camera2.data'
 # 加载模型网络参数的文件名
-_C.OUTPUT.SAVE_NET_FILENAME = '/33000_CNN.pkl'
+_C.OUTPUT.SAVE_NET_FILENAME = '/000_CNN.pkl'
 # 加载模型优化器参数的文件名
-_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/33000_opt.pkl'
+_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/000_opt.pkl'
 # 记录打印内容
 _C.OUTPUT.LOGGING = '../output/log.txt'
 
@@ -115,9 +115,8 @@ _C.TEST.IMAGE_BATCH = 1
 _C.TEST.IMAGE_CHANNEL = 1
 _C.TEST.IMAGE_LENGTH = 320
 _C.TEST.IMAGE_HEIGHT = 240
-_C.TEST.VERTICS_DIMENSION = 3
 # 测试输出路径
-_C.TEST.SAVE_OBJ = '../output/CNN_test_output'
+_C.TEST.SAVE_OBJ = '../output/20200908_161740_C2'
 
 
 def get_cfg_defaults():
