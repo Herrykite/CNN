@@ -25,6 +25,11 @@ restore = transforms.Compose([
     transforms.ToPILImage()
 ])
 
+transform_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=0.3156022930958101, std=0.28214540372352737)
+])
+
 
 class DataSet(data.Dataset):
     def __init__(self, root):
@@ -37,17 +42,17 @@ class DataSet(data.Dataset):
     def __getitem__(self, item):
         img_path = self.images[item]
         figure = Image.open(img_path).convert('L')
-        label, faces = get_vertics(item)
+        # label, faces = get_vertics(item)
         if self.transforms:
             img_data = self.transforms(figure)
         else:
             figure = np.asarray(figure)
             img_data = torch.from_numpy(figure)
-        lab_data = torch.from_numpy(label)
+        # lab_data = torch.from_numpy(label)
         # 下两行用于训练前测试标签与输入是否相互对应，正式训练时注释
         # check_before_train(img_data, lab_data, faces, item)
         # restore(img_data).show()
-        return img_data, lab_data
+        return img_data, item
 
     def __len__(self):
         return len(self.images)
@@ -63,10 +68,10 @@ def check_before_train(images, labels, faces, item):
 
 
 def get_mean_std():
-    image_list = os.listdir(cfg.DATASETS.SAVE_RESIZE_IMAGES)
+    image_list = os.listdir(cfg.INPUT.SAVE_RESIZE_IMAGES)
     means, variances = 0, 0
     for i in range(len(image_list)):
-        img_data = transform(Image.open(cfg.DATASETS.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        img_data = transform(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
         means += img_data.mean()
         variances += img_data.var()
     mean = np.asarray(means) / len(image_list)
@@ -78,7 +83,7 @@ def get_mean_std():
 
 class SingleTest:
     def __init__(self, img_path):
-        self.transforms = transform
+        self.transforms = transform_test
         self.img_path = img_path
 
     def output_data(self, img_path):
