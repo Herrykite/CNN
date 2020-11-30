@@ -27,7 +27,7 @@ restore = transforms.Compose([
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize(mean=0.3156022930958101, std=0.28214540372352737)
+    transforms.Normalize(mean=0.24384246366841328, std=0.21861789859402697)
 ])
 
 
@@ -71,7 +71,7 @@ def get_mean_std():
     image_list = os.listdir(cfg.INPUT.SAVE_RESIZE_IMAGES)
     means, variances = 0, 0
     for i in range(len(image_list)):
-        img_data = transform(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        img_data = transforms.ToTensor()(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
         means += img_data.mean()
         variances += img_data.var()
     mean = np.asarray(means) / len(image_list)
