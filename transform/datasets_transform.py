@@ -12,22 +12,23 @@ from ConvNet.tools.deal_with_obj import writeObj
 
 cfg = get_cfg_defaults()
 transform = transforms.Compose([
-    transforms.ColorJitter(brightness=(0.75, 1.5), contrast=(0.83333, 1.2),
+    transforms.ColorJitter(brightness=(0.4, 1.2), contrast=(0.5, 2),
                            saturation=(0.83333, 1.2), hue=(-0.2, 0.2)),
-    transforms.RandomRotation(5),
-    transforms.RandomAffine(degrees=0, translate=(0.2, 0.2), scale=(0.95, 1.05), shear=(-5, 5, -5, 5)),
+    transforms.RandomRotation(3),
+    transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.99, 1.01), shear=(-2, 2, -2, 2)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=0.3156022930958101, std=0.28214540372352737)
+    transforms.Normalize(mean=0.3403131123687272, std=0.2668040246671969)
 ])
 
 restore = transforms.Compose([
-    transforms.Normalize(mean=-1.1185803097649145, std=3.5442718073830264),
+    transforms.Normalize(mean=-1.596812585100412, std=3.7238888795090084),
     transforms.ToPILImage()
 ])
 
 transform_test = transforms.Compose([
+    transforms.ColorJitter(brightness=(1.6, 1.6), contrast=(0.8, 0.8)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=0.24384246366841328, std=0.21861789859402697)
+    transforms.Normalize(mean=0.4288024258422422, std=0.2685364768810849)
 ])
 
 
@@ -71,7 +72,9 @@ def get_mean_std():
     image_list = os.listdir(cfg.INPUT.SAVE_RESIZE_IMAGES)
     means, variances = 0, 0
     for i in range(len(image_list)):
-        img_data = transforms.ToTensor()(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        # img_data = transforms.ToTensor()(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        img_data = transform_test(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        restore(img_data).show()
         means += img_data.mean()
         variances += img_data.var()
     mean = np.asarray(means) / len(image_list)
