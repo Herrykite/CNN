@@ -9,24 +9,34 @@ from torch.utils.data import DataLoader
 from ConvNet.tools.deal_with_obj import writeObj
 from ConvNet.transform.datasets_transform import DataSet, SingleTest
 from ConvNet.modeling.cnn import PCAnet
-from ConvNet.modeling.newcnn import CNN
+# from torchvision.models.resnet import resnet50, Bottleneck
 from ConvNet.tools.preprocess_data import mkdir, get_vertics
 from ConvNet.config.defaults import get_cfg_defaults
-# from sklearn.decomposition import PCA
+
 
 # 调用配置文件
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 cfg = get_cfg_defaults()
 # 神经网络初始化
 net = PCAnet()
-net.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME))
+saved_net = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME)
+pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
+pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
+pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
+net.load_state_dict(pretrained_net_dict)
 print('loaded net successfully!')
 device = cfg.MODEL.DEVICE1
 net = net.to(device)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.ADJUST_LR)
-optimizer.load_state_dict(torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME))
+saved_optimizer = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME)
+pretrained_optimizer_dict = {k: v for k, v in saved_optimizer.items() if k in net.state_dict().keys()}
+pretrained_optimizer_dict.update({list(optimizer.state_dict().keys())[-2]:
+                                      optimizer.state_dict()[list(optimizer.state_dict().keys())[-2]]})
+pretrained_optimizer_dict.update({list(optimizer.state_dict().keys())[-1]:
+                                      optimizer.state_dict()[list(optimizer.state_dict().keys())[-1]]})
+optimizer.load_state_dict(pretrained_optimizer_dict)
 print('loaded optimizer successfully!')
 # 检查可训练的参数
 for name, param in net.named_parameters():
@@ -99,7 +109,7 @@ def proofread():
 def whole_proofread():
     net.eval()
     for rand in range(len(image_list)):
-        print('测试图片为:', image_list[rand], '\n对应Obj为：', label_list[rand])
+        print('测试图片为:', image_list[rand])
         test = SingleTest(img_path=image_path + image_list[rand])
         image = test.output_data(img_path=image_path + image_list[rand])
         image = image.expand(cfg.TEST.IMAGE_BATCH, cfg.TEST.IMAGE_CHANNEL, cfg.TEST.IMAGE_LENGTH, cfg.TEST.IMAGE_HEIGHT)
@@ -107,14 +117,14 @@ def whole_proofread():
         mkdir(cfg.TEST.SAVE_OBJ)
         with torch.no_grad():
             predict = net(image)[0]
-            vertics, faces = get_vertics(rand)
+            vertics, faces = get_vertics(0)
             predict = predict.cpu().numpy()
             predict = torch.tensor(pca.inverse_transform(predict))
         # 输出为.obj文件
         pre_vertics = []
         for order in range(len(predict) // 3):
             pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + str(rand) + '.obj', pre_vertics, faces)
 
 
 def save(number):
@@ -151,5 +161,5 @@ def run():
 
 
 if __name__ == '__main__':
-    # run()
-    whole_proofread()
+    run()
+    # whole_proofread()
