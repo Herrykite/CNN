@@ -29,14 +29,11 @@ device = cfg.MODEL.DEVICE1
 net = net.to(device)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.ADJUST_LR)
+optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
 saved_optimizer = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME)
-pretrained_optimizer_dict = {k: v for k, v in saved_optimizer.items() if k in net.state_dict().keys()}
-pretrained_optimizer_dict.update({list(optimizer.state_dict().keys())[-2]:
-                                      optimizer.state_dict()[list(optimizer.state_dict().keys())[-2]]})
-pretrained_optimizer_dict.update({list(optimizer.state_dict().keys())[-1]:
-                                      optimizer.state_dict()[list(optimizer.state_dict().keys())[-1]]})
-optimizer.load_state_dict(pretrained_optimizer_dict)
+# 如果变更网络结构，此处在读取参数时遍历k的范围需要进行修改，尤其是更换数据时全连接层降维后的输出维度会有变化。
+saved_optimizer['state'] = {k: v for k, v in saved_optimizer['state'].items() if k < len(saved_optimizer['state'])-2}
+optimizer.load_state_dict(saved_optimizer)
 print('loaded optimizer successfully!')
 # 检查可训练的参数
 for name, param in net.named_parameters():
