@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import json
 import os
 import re
@@ -40,14 +41,14 @@ def initial_load():
     input_path = cfg.INPUT.VERTICS_PATH
     file_list = os.listdir(input_path)
     file_list.sort(key=lambda x: len(x))
-    mkdir(cfg.OUTPUT.CNN_INITIAL_DATA_PATH)
+    mkdir(path)
     for count in range(len(file_list)):
         datas = []
         if file_list[count].endswith('.obj'):
             vertics, faces = loadObj(input_path + file_list[count])
             datas.append([vertics, faces])
-            print(count, '.obj finished')
-        Woodblock(count, datas)  # 此句执行完以后均存储为.data文件
+            print(file_list[count], 'finished')
+        Woodblock(re.sub("\D", "", str(file_list[count])), datas)  # 此句执行完以后均存储为.data文件
 
 
 def get_vertics(count):

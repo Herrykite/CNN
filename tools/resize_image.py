@@ -10,8 +10,8 @@ transform = transforms.Compose([
     transforms.Resize(cfg.DATASETS.TRANSFORM_RESIZE),
 ])
 
-image_path = cfg.INPUT.IMAGES_PATH
-save_image_path = cfg.DATASETS.SAVE_RESIZE_IMAGES
+image_path = cfg.DATASETS.IMAGES_PATH
+save_image_path = cfg.INPUT.SAVE_RESIZE_IMAGES
 images = os.listdir(image_path)
 mkdir(save_image_path)
 for i in range(len(images)):

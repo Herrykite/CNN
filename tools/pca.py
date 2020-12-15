@@ -18,7 +18,7 @@ if __name__ == '__main__':
         data.append(np.array(vertics).reshape(7657, 3))
     data = np.array(data)
     data = data.reshape(len(file_list), 3 * 7657)
-    pca = PCA(n_components=0.999999)
+    pca = PCA(n_components=0.9999999)
     pca_coefficient = pca.fit_transform(data)
     feature_info = np.zeros(len(file_list))
     for j in range(len(file_list)):
