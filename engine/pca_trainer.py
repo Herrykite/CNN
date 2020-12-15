@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from ConvNet.tools.deal_with_obj import writeObj
 from ConvNet.transform.datasets_transform import DataSet, SingleTest
 from ConvNet.modeling.cnn import PCAnet
-# from torchvision.models.resnet import resnet50, Bottleneck
+# from torchvision.models.resnet import resnet50
 from ConvNet.tools.preprocess_data import mkdir, get_vertics
 from ConvNet.config.defaults import get_cfg_defaults
 
@@ -20,10 +20,14 @@ cfg = get_cfg_defaults()
 # 神经网络初始化
 net = PCAnet()
 saved_net = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME)
-pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
-pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
-pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
-net.load_state_dict(pretrained_net_dict)
+# pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
+# pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
+# pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
+# net.load_state_dict(pretrained_net_dict)
+net.load_state_dict(saved_net)
+# net = resnet50(pretrained=True)
+# net.conv1 = torch.nn.Conv2d(1, 64, (7, 7), (2, 2))
+# net.fc = torch.nn.Linear(2048, 369)
 print('loaded net successfully!')
 device = cfg.MODEL.DEVICE1
 net = net.to(device)
@@ -32,7 +36,7 @@ criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
 saved_optimizer = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME)
 # 如果变更网络结构，此处在读取参数时遍历k的范围需要进行修改，尤其是更换数据时全连接层降维后的输出维度会有变化。
-saved_optimizer['state'] = {k: v for k, v in saved_optimizer['state'].items() if k < len(saved_optimizer['state'])-2}
+# saved_optimizer['state'] = {k: v for k, v in saved_optimizer['state'].items() if k < len(saved_optimizer['state'])-2}
 optimizer.load_state_dict(saved_optimizer)
 print('loaded optimizer successfully!')
 # 检查可训练的参数
@@ -65,7 +69,7 @@ def train(number):
         labels = labels.to(device)
         output = net(images)  # 网络前向运行
         print('epoch:', number, '  batch:', i)
-        loss = criterion(output*1000, labels*1000)  # 计算网络的损失函数
+        loss = criterion(output*100, labels*100)  # 计算网络的损失函数
         if i % 60 == 0:
             with open(cfg.OUTPUT.LOGGING, 'a') as f:
                 print('第', number, '轮  第', i, '次 Loss =', loss.item(), file=f)
@@ -89,7 +93,7 @@ def proofread():
     mkdir(cfg.TEST.SAVE_OBJ)
     with torch.no_grad():
         predict = net(image)[0]
-        vertics, faces = get_vertics(rand)
+        vertics, faces = get_vertics(label_list[rand])
         vertics = torch.tensor(vertics.reshape(3, 7657).T.reshape(22971))
         predict = predict.cpu().numpy()
         predict = torch.tensor(pca.inverse_transform(predict))
@@ -121,7 +125,7 @@ def whole_proofread():
         pre_vertics = []
         for order in range(len(predict) // 3):
             pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + str(rand) + '.obj', pre_vertics, faces)
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
 
 
 def save(number):
@@ -158,5 +162,5 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
-    # whole_proofread()
+    # run()
+    whole_proofread()
