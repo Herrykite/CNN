@@ -125,7 +125,7 @@ def whole_proofread():
         pre_vertics = []
         for order in range(len(predict) // 3):
             pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
+        writeObj(cfg.TEST.SAVE_OBJ + '/' + str(rand) + '.obj', pre_vertics, faces)
 
 
 def save(number):
