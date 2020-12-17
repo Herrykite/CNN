@@ -1,4 +1,7 @@
 # -*- coding: UTF-8 -*-
+import sys
+
+sys.path.insert(0, '../../')
 import math
 import os
 import torch
@@ -14,21 +17,21 @@ cfg = get_cfg_defaults()
 transform = transforms.Compose([
     transforms.ColorJitter(brightness=(0.4, 1.2), contrast=(0.5, 2),
                            saturation=(0.83333, 1.2), hue=(-0.2, 0.2)),
-    transforms.RandomRotation(3),
-    transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.99, 1.01), shear=(-2, 2, -2, 2)),
+    transforms.RandomRotation(5),
+    transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.95, 1.05), shear=(-2, 2, -2, 2)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=0.3403131123687272, std=0.2668040246671969)
+    transforms.Normalize(mean=cfg.DATASETS.TRANSFORM_MEAN, std=cfg.DATASETS.TRANSFORM_STD)
 ])
 
 restore = transforms.Compose([
-    transforms.Normalize(mean=-1.596812585100412, std=3.7238888795090084),
+    transforms.Normalize(mean=-cfg.DATASETS.TRANSFORM_MEAN/cfg.DATASETS.TRANSFORM_STD,
+                         std=1/cfg.DATASETS.TRANSFORM_STD),
     transforms.ToPILImage()
 ])
 
 transform_test = transforms.Compose([
-    transforms.ColorJitter(brightness=(1.6, 1.6), contrast=(0.8, 0.8)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=0.4288024258422422, std=0.2685364768810849)
+    transforms.Normalize(mean=cfg.DATASETS.TRANSFORM_MEAN, std=cfg.DATASETS.TRANSFORM_STD)
 ])
 
 
@@ -50,7 +53,7 @@ class DataSet(data.Dataset):
             figure = np.asarray(figure)
             img_data = torch.from_numpy(figure)
         # lab_data = torch.from_numpy(label)
-        # 下两行用于训练前测试标签与输入是否相互对应，正式训练时注释
+        # 下两行为编译时用于测试训练前标签与输入是否相互对应，正式训练时注释
         # check_before_train(img_data, lab_data, faces, item)
         # restore(img_data).show()
         return img_data, item
@@ -69,12 +72,13 @@ def check_before_train(images, labels, faces, item):
 
 
 def get_mean_std():
+    print('Calculating the mean and variance of the given dataset...')
     image_list = os.listdir(cfg.INPUT.SAVE_RESIZE_IMAGES)
     means, variances = 0, 0
     for i in range(len(image_list)):
-        # img_data = transforms.ToTensor()(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
-        img_data = transform_test(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
-        restore(img_data).show()
+        img_data = transforms.ToTensor()(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        # img_data = transform_test(Image.open(cfg.INPUT.SAVE_RESIZE_IMAGES + image_list[i]).convert('L'))
+        # restore(img_data).show()
         means += img_data.mean()
         variances += img_data.var()
     mean = np.asarray(means) / len(image_list)
