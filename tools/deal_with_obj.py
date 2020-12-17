@@ -1,3 +1,8 @@
+import sys
+
+sys.path.insert(0, '../../')
+
+
 def loadObj(path):
     """Load obj file
     读取三角形和四边形的mesh

@@ -1,3 +1,6 @@
+import sys
+
+sys.path.insert(0, '../../')
 import os
 import pickle
 import numpy as np
@@ -7,6 +10,7 @@ from ConvNet.tools.deal_with_obj import loadObj
 
 
 if __name__ == '__main__':
+    print('The vertex data is being dimensionally reduced...')
     cfg = get_cfg_defaults()
     input_path = cfg.INPUT.VERTICS_PATH
     file_list = os.listdir(input_path)
@@ -15,9 +19,9 @@ if __name__ == '__main__':
     for i in range(len(file_list)):
         print(i, 'finished')
         vertics, faces = loadObj(input_path + file_list[i])
-        data.append(np.array(vertics).reshape(7657, 3))
+        data.append(np.array(vertics).reshape(cfg.INPUT.VERTICS_NUM//3, 3))
     data = np.array(data)
-    data = data.reshape(len(file_list), 3 * 7657)
+    data = data.reshape(len(file_list), cfg.INPUT.VERTICS_NUM)
     pca = PCA(n_components=0.9999999)
     pca_coefficient = pca.fit_transform(data)
     feature_info = np.zeros(len(file_list))

@@ -1,3 +1,6 @@
+import sys
+
+sys.path.insert(0, '../../')
 import matplotlib.pyplot as plt
 from ConvNet.config.defaults import get_cfg_defaults
 

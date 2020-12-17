@@ -1,4 +1,7 @@
 # -*- coding: UTF-8 -*-
+import sys
+
+sys.path.insert(0, '../../')
 import json
 import os
 import re
@@ -37,7 +40,17 @@ def Woodblock(order, data):  # 活字印刷术
         new_file.close()
 
 
-def initial_load():
+def get_vertics(count):
+    f = open(path + '/' + re.sub("\D", "", str(count)) + '.data')
+    model = json.load(f)
+    f.close()
+    vertics = np.array(model['camera2']['mesh'][0]['points'], dtype=np.float32)
+    faces = model['camera2']['mesh'][1]['points']
+    return vertics, faces
+
+
+def extract_obj():
+    print('Extracting the values from the .obj file...')
     input_path = cfg.INPUT.VERTICS_PATH
     file_list = os.listdir(input_path)
     file_list.sort(key=lambda x: len(x))
@@ -51,14 +64,5 @@ def initial_load():
         Woodblock(re.sub("\D", "", str(file_list[count])), datas)  # 此句执行完以后均存储为.data文件
 
 
-def get_vertics(count):
-    f = open(path + '/' + re.sub("\D", "", str(count)) + '.data')
-    model = json.load(f)
-    f.close()
-    vertics = np.array(model['camera2']['mesh'][0]['points'], dtype=np.float32)
-    faces = model['camera2']['mesh'][1]['points']
-    return vertics, faces
-
-
 if __name__ == '__main__':
-    initial_load()
+    extract_obj()
