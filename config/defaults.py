@@ -16,8 +16,8 @@ _C.MODEL.DEVICE2 = 'cpu'
 # -----------------------------------------------------------------------------
 
 _C.DATASETS = CfgNode()
-_C.DATASETS.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/160446/c2_rot/'
-_C.DATASETS.SAVE_INTERVAL = 500
+_C.DATASETS.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-09-08/162524/c2_rot/'
+_C.DATASETS.SAVE_INTERVAL = 100
 # 保存参数轮次间隔
 _C.DATASETS.TRANSFORM_RESIZE = 240
 # 统一缩放
@@ -47,6 +47,8 @@ _C.DATASETS.RANDOMERASING_RATIO = (0.5, 2.0)
 # 随机擦除遮挡区域的宽高比范围
 _C.DATASETS.RANDOMERASING_VALUE = 0
 # 随机擦除遮挡区域的像素值
+_C.DATASETS.TRANSFORM_MEAN = 0.2505587556236248
+_C.DATASETS.TRANSFORM_STD = 0.2249028815826022
 
 # ---------------------------------------------------------------------------- #
 # Solver
@@ -76,14 +78,15 @@ _C.VISUAL.LINE_LABEL = 'Loss'
 # ---------------------------------------------------------------------------- #
 
 _C.INPUT = CfgNode()
-_C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/161240/output_v2/total/'
-# _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNNTEST/labels/'
-# _C.INPUT.VERTICS_PATH = '../output/CNN_input_obj/'
-# _C.INPUT.SAVE_RESIZE_IMAGES = '../output/CNN_output_image/'
-_C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_3082Dataset/images/'
+# _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-09-08/162524/output/total/'
+_C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNN_1193Dataset/labels/'
+# _C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_9824_20200908_162524_C2/'
+_C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_1193Dataset/images/'
 _C.INPUT.CHECK = '../output/check/'
 _C.INPUT.BATCH_SIZE = 16
 _C.INPUT.BASE_EPOCH = 1
+_C.INPUT.VERTICS_NUM = 22971
+_C.INPUT.PCA_DIMENSION = 638
 
 
 # ---------------------------------------------------------------------------- #
@@ -95,15 +98,16 @@ _C.OUTPUT = CfgNode()
 _C.OUTPUT.PARAMETER = '../output/CNN_output_parameter'
 # 数据预处理后的读取地址
 _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data'
-# _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data_MINI'
+# _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data_MAX'
 # 数据预处理所需的.json模板
 _C.OUTPUT.CNN_FORMAT_JSON_FILENAME = 'CNN_Format_Camera2.data'
 # 加载模型网络参数的文件名
-_C.OUTPUT.SAVE_NET_FILENAME = '/000_CNN.pkl'
+_C.OUTPUT.SAVE_NET_FILENAME = '/20200908_162524_C2_CNN.pkl'
 # 加载模型优化器参数的文件名
-_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/000_opt.pkl'
+_C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/20200908_162524_C2_opt.pkl'
 # 记录打印内容
-_C.OUTPUT.LOGGING = '../output/log.txt'
+# _C.OUTPUT.LOGGING = '../output/log.txt'
+_C.OUTPUT.LOGGING = '../output/log_MINI.txt'
 
 # ---------------------------------------------------------------------------- #
 # Test
@@ -116,7 +120,8 @@ _C.TEST.IMAGE_CHANNEL = 1
 _C.TEST.IMAGE_LENGTH = 320
 _C.TEST.IMAGE_HEIGHT = 240
 # 测试输出路径
-_C.TEST.SAVE_OBJ = '../output/20200908_161740_C2'
+# _C.TEST.SAVE_OBJ = 'D:/DIGISKY/OBJ/64_MINI'
+_C.TEST.SAVE_OBJ = 'D:/DIGISKY/OBJ/20200821_160810_C1'
 
 
 def get_cfg_defaults():
