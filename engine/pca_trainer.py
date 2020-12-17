@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
-# import sys
-# sys.path.insert(0, '/home/digisky/wanghairui')
+import sys
+
+sys.path.insert(0, '../../')
 import os
 import torch
 import pickle
@@ -15,15 +16,16 @@ from ConvNet.config.defaults import get_cfg_defaults
 
 
 # 调用配置文件
+print('Start training...')
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 cfg = get_cfg_defaults()
 # 神经网络初始化
 net = PCAnet()
 saved_net = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME)
-# pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
-# pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
-# pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
-# net.load_state_dict(pretrained_net_dict)
+pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
+pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
+pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
+net.load_state_dict(pretrained_net_dict)
 net.load_state_dict(saved_net)
 # net = resnet50(pretrained=True)
 # net.conv1 = torch.nn.Conv2d(1, 64, (7, 7), (2, 2))
@@ -69,7 +71,7 @@ def train(number):
         labels = labels.to(device)
         output = net(images)  # 网络前向运行
         print('epoch:', number, '  batch:', i)
-        loss = criterion(output*100, labels*100)  # 计算网络的损失函数
+        loss = criterion(output*10, labels*10)  # 计算网络的损失函数
         if i % 60 == 0:
             with open(cfg.OUTPUT.LOGGING, 'a') as f:
                 print('第', number, '轮  第', i, '次 Loss =', loss.item(), file=f)
@@ -94,7 +96,7 @@ def proofread():
     with torch.no_grad():
         predict = net(image)[0]
         vertics, faces = get_vertics(label_list[rand])
-        vertics = torch.tensor(vertics.reshape(3, 7657).T.reshape(22971))
+        vertics = torch.tensor(vertics.reshape(3, cfg.INPUT.VERTICS_NUM//3).T.reshape(cfg.INPUT.VERTICS_NUM))
         predict = predict.cpu().numpy()
         predict = torch.tensor(pca.inverse_transform(predict))
         loss = criterion(vertics, predict)
@@ -105,27 +107,6 @@ def proofread():
     for order in range(len(predict) // 3):
         pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
     writeObj(cfg.TEST.SAVE_OBJ + '/' + label_list[rand], pre_vertics, faces)
-
-
-def whole_proofread():
-    net.eval()
-    for rand in range(len(image_list)):
-        print('测试图片为:', image_list[rand])
-        test = SingleTest(img_path=image_path + image_list[rand])
-        image = test.output_data(img_path=image_path + image_list[rand])
-        image = image.expand(cfg.TEST.IMAGE_BATCH, cfg.TEST.IMAGE_CHANNEL, cfg.TEST.IMAGE_LENGTH, cfg.TEST.IMAGE_HEIGHT)
-        image = image.to(device)
-        mkdir(cfg.TEST.SAVE_OBJ)
-        with torch.no_grad():
-            predict = net(image)[0]
-            vertics, faces = get_vertics(0)
-            predict = predict.cpu().numpy()
-            predict = torch.tensor(pca.inverse_transform(predict))
-        # 输出为.obj文件
-        pre_vertics = []
-        for order in range(len(predict) // 3):
-            pre_vertics.append([predict[3*order], predict[3*order + 1], predict[3*order + 2]])
-        writeObj(cfg.TEST.SAVE_OBJ + '/' + str(rand) + '.obj', pre_vertics, faces)
 
 
 def save(number):
@@ -156,11 +137,10 @@ def run():
         adjust_learning_rate(epoch)
         train(epoch)
         proofread()
-        if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
-            save(epoch)
+        # if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
+        #     save(epoch)
         epoch += 1
 
 
 if __name__ == '__main__':
-    # run()
-    whole_proofread()
+    run()                       # Train
