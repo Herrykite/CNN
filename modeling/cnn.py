@@ -1,6 +1,12 @@
 # -*- coding: UTF-8 -*-
+import sys
+
+sys.path.insert(0, '../../')
 from collections import OrderedDict
 from torch import nn
+from ConvNet.config.defaults import get_cfg_defaults
+
+cfg = get_cfg_defaults()
 
 
 class PCAnet(nn.Module):
@@ -22,14 +28,14 @@ class PCAnet(nn.Module):
             ('conv11', nn.Conv2d(324, 486, kernel_size=(3, 3), stride=2, padding=1)),
             ('bn12', nn.BatchNorm2d(486)),
             ('relu3', nn.ReLU(inplace=True))
-            ]))
+        ]))
         self.dropout = nn.Dropout(p=0.2)
         self.fc1 = nn.Sequential(OrderedDict([
-            ('fc1', nn.Linear(9720, 364))
+            ('fc1', nn.Linear(9720, cfg.INPUT.PCA_DIMENSION))
         ]))
 
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.Conv2d) and isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, nn.BatchNorm2d):
                 # constant_用第二个参数值填充向量
