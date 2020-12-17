@@ -1,0 +1,2 @@
+cd 'D:\Program Files\JetBrains\Python Project\ConvNet\engine'
+python pca_trainer.py
