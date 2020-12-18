@@ -1,4 +1,4 @@
-cd '..\..\'
+cd '..\'
 cd '.\config'
 python user_input.py
 cd '..\'
