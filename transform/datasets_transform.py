@@ -5,15 +5,18 @@ sys.path.insert(0, '../../')
 import math
 import os
 import torch
+import yaml
 from torch.utils import data
 from PIL import Image
 import numpy as np
 from torchvision import transforms
 from ConvNet.config.defaults import get_cfg_defaults
-from ConvNet.tools.preprocess_data import get_vertics, mkdir
+from ConvNet.tools.preprocess_data import mkdir
 from ConvNet.tools.deal_with_obj import writeObj
 
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
+
 transform = transforms.Compose([
     transforms.ColorJitter(brightness=(0.4, 1.2), contrast=(0.5, 2),
                            saturation=(0.83333, 1.2), hue=(-0.2, 0.2)),
@@ -84,6 +87,12 @@ def get_mean_std():
     mean = np.asarray(means) / len(image_list)
     variance = np.asarray(variances) / len(image_list)
     std = math.sqrt(variance)
+    with open(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1], 'r') as f:
+        menu = yaml.load(f, Loader=yaml.FullLoader)
+        menu['DATASETS']['TRANSFORM_MEAN'] = float(mean)
+        menu['DATASETS']['TRANSFORM_STD'] = std
+    with open(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1], 'w') as f:
+        yaml.dump(menu, f)
     print('mean= ', mean, 'std= ', std)
     return mean, std
 
