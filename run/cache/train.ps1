@@ -1,2 +1,3 @@
-cd 'D:\Program Files\JetBrains\Python Project\ConvNet\engine'
+cd '..\..\'
+cd '.\engine'
 python pca_trainer.py

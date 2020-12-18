@@ -1,6 +1,8 @@
-cd 'D:\Program Files\JetBrains\Python Project\ConvNet\config'
+cd '..\..\'
+cd '.\config'
 python user_input.py
-cd 'D:\Program Files\JetBrains\Python Project\ConvNet\tools'
+cd '..\'
+cd '.\tools'
 python preprocess_data.py
 python resize_image.py
 python pca.py
