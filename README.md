@@ -6,7 +6,13 @@ Author : WangHairui
 Python 3.8.3\
 Cuda compilation tools, release 11.0, V11.0.221\
 Pytorch 1.6.0\
-yacs
+sys\
+yacs\
+pickle\
+yaml\
+json\
+os\
+torchvision
 
 
 # How To Use
