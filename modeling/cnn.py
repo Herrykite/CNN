@@ -2,11 +2,13 @@
 import sys
 
 sys.path.insert(0, '../../')
+import os
 from collections import OrderedDict
 from torch import nn
 from ConvNet.config.defaults import get_cfg_defaults
 
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
 
 
 class PCAnet(nn.Module):
