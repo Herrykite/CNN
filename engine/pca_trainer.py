@@ -19,28 +19,29 @@ from ConvNet.config.defaults import get_cfg_defaults
 print('Start training...')
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
 # 神经网络初始化
 net = PCAnet()
-saved_net = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME)
-pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
-pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
-pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
-net.load_state_dict(pretrained_net_dict)
-net.load_state_dict(saved_net)
+# saved_net = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_NET_FILENAME)
+# pretrained_net_dict = {k: v for k, v in saved_net.items() if k in net.state_dict().keys()}
+# pretrained_net_dict.update({list(net.state_dict().keys())[-2]: net.state_dict()[list(net.state_dict().keys())[-2]]})
+# pretrained_net_dict.update({list(net.state_dict().keys())[-1]: net.state_dict()[list(net.state_dict().keys())[-1]]})
+# net.load_state_dict(pretrained_net_dict)    # 舍去全连接层模型参数
+# net.load_state_dict(saved_net)    # 保留全连接层模型参数
 # net = resnet50(pretrained=True)
 # net.conv1 = torch.nn.Conv2d(1, 64, (7, 7), (2, 2))
 # net.fc = torch.nn.Linear(2048, 369)
-print('loaded net successfully!')
+# print('loaded net successfully!')
 device = cfg.MODEL.DEVICE1
 net = net.to(device)
 # 定义损失函数与优化器参数
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=cfg.SOLVER.BASE_LR)
-saved_optimizer = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME)
+# saved_optimizer = torch.load(cfg.OUTPUT.PARAMETER + cfg.OUTPUT.SAVE_OPTIMIZER_FILENAME)
 # 如果变更网络结构，此处在读取参数时遍历k的范围需要进行修改，尤其是更换数据时全连接层降维后的输出维度会有变化。
 # saved_optimizer['state'] = {k: v for k, v in saved_optimizer['state'].items() if k < len(saved_optimizer['state'])-2}
-optimizer.load_state_dict(saved_optimizer)
-print('loaded optimizer successfully!')
+# optimizer.load_state_dict(saved_optimizer)
+# print('loaded optimizer successfully!')
 # 检查可训练的参数
 for name, param in net.named_parameters():
     if param.requires_grad:
@@ -70,12 +71,12 @@ def train(number):
         images = images.to(device)
         labels = labels.to(device)
         output = net(images)  # 网络前向运行
-        print('epoch:', number, '  batch:', i)
         loss = criterion(output*10, labels*10)  # 计算网络的损失函数
         if i % 60 == 0:
+            print('epoch:', number, '  batch:', i)
             with open(cfg.OUTPUT.LOGGING, 'a') as f:
                 print('第', number, '轮  第', i, '次 Loss =', loss.item(), file=f)
-        print('Loss =', loss.item())
+            print('Loss =', loss.item())
         train_loss.append(loss.item())
         optimizer.zero_grad()
         loss.backward()  # 反向传播梯度
@@ -137,8 +138,8 @@ def run():
         adjust_learning_rate(epoch)
         train(epoch)
         proofread()
-        # if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
-        #     save(epoch)
+        if epoch % cfg.DATASETS.SAVE_INTERVAL == cfg.DATASETS.SAVE_INTERVAL-1:
+            save(epoch)
         epoch += 1
 
 

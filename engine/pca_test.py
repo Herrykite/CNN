@@ -16,6 +16,7 @@ from ConvNet.config.defaults import get_cfg_defaults
 # 调用配置文件
 print('Start testing...')
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
 # 神经网络初始化
 net = PCAnet()
 # net = resnet50(pretrained=True)
