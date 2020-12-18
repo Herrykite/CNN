@@ -3,6 +3,7 @@ import sys
 
 sys.path.insert(0, '../../')
 import json
+import yaml
 import os
 import re
 import numpy as np
@@ -10,6 +11,7 @@ from ConvNet.tools.deal_with_obj import loadObj
 from ConvNet.config.defaults import get_cfg_defaults
 
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
 path = cfg.OUTPUT.CNN_INITIAL_DATA_PATH
 
 
@@ -61,8 +63,15 @@ def extract_obj():
             vertics, faces = loadObj(input_path + file_list[count])
             datas.append([vertics, faces])
             print(file_list[count], 'finished')
+            if count == 0:
+                with open(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1], 'r') as f:
+                    menu = yaml.load(f, Loader=yaml.FullLoader)
+                    menu['INPUT']['VERTICS_NUM'] = len(vertics) * 3
+                with open(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1], 'w') as f:
+                    yaml.dump(menu, f)
         Woodblock(re.sub("\D", "", str(file_list[count])), datas)  # 此句执行完以后均存储为.data文件
 
 
 if __name__ == '__main__':
     extract_obj()
+

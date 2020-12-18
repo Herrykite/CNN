@@ -2,9 +2,11 @@ import sys
 
 sys.path.insert(0, '../../')
 import matplotlib.pyplot as plt
+import os
 from ConvNet.config.defaults import get_cfg_defaults
 
 cfg = get_cfg_defaults()
+cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
 
 
 def draw_train_process(title, i, loss, label):

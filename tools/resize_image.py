@@ -10,6 +10,7 @@ from ConvNet.tools.preprocess_data import mkdir
 if __name__ == '__main__':
     print('The photo data is being resized...')
     cfg = get_cfg_defaults()
+    cfg.merge_from_file(cfg.MODEL.CONFIG + os.listdir(cfg.MODEL.CONFIG)[-1])
     transform = transforms.Compose([
         transforms.Resize(cfg.DATASETS.TRANSFORM_RESIZE),
     ])
