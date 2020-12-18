@@ -10,13 +10,14 @@ _C = CfgNode()
 _C.MODEL = CfgNode()
 _C.MODEL.DEVICE1 = 'cuda'
 _C.MODEL.DEVICE2 = 'cpu'
+_C.MODEL.CONFIG = '../config/config_cache/'
 
 # -----------------------------------------------------------------------------
 # Dataset
 # -----------------------------------------------------------------------------
 
 _C.DATASETS = CfgNode()
-_C.DATASETS.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-09-08/162524/c2_rot/'
+_C.DATASETS.IMAGES_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/160810/c1_rot/'
 _C.DATASETS.SAVE_INTERVAL = 100
 # 保存参数轮次间隔
 _C.DATASETS.TRANSFORM_RESIZE = 240
@@ -47,8 +48,8 @@ _C.DATASETS.RANDOMERASING_RATIO = (0.5, 2.0)
 # 随机擦除遮挡区域的宽高比范围
 _C.DATASETS.RANDOMERASING_VALUE = 0
 # 随机擦除遮挡区域的像素值
-_C.DATASETS.TRANSFORM_MEAN = 0.2505587556236248
-_C.DATASETS.TRANSFORM_STD = 0.2249028815826022
+_C.DATASETS.TRANSFORM_MEAN = 0.3376989895544583
+_C.DATASETS.TRANSFORM_STD = 0.2616380854654215
 
 # ---------------------------------------------------------------------------- #
 # Solver
@@ -78,10 +79,10 @@ _C.VISUAL.LINE_LABEL = 'Loss'
 # ---------------------------------------------------------------------------- #
 
 _C.INPUT = CfgNode()
-# _C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-09-08/162524/output/total/'
-_C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNN_1193Dataset/labels/'
-# _C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_9824_20200908_162524_C2/'
-_C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_1193Dataset/images/'
+_C.INPUT.VERTICS_PATH = '//192.168.20.63/ai/double_camera_data/2020-08-21/160810/output_2/total/'
+# _C.INPUT.VERTICS_PATH = 'D:/DIGISKY/CNN_1193Dataset/labels/'
+_C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_12987_20200821_160810_C1/'
+# _C.INPUT.SAVE_RESIZE_IMAGES = 'D:/DIGISKY/CNN_1193Dataset/images/'
 _C.INPUT.CHECK = '../output/check/'
 _C.INPUT.BATCH_SIZE = 16
 _C.INPUT.BASE_EPOCH = 1
@@ -97,7 +98,7 @@ _C.OUTPUT = CfgNode()
 # 保存、加载模型参数的地址
 _C.OUTPUT.PARAMETER = '../output/CNN_output_parameter'
 # 数据预处理后的读取地址
-_C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data'
+_C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/20200821_160810_C1_data'
 # _C.OUTPUT.CNN_INITIAL_DATA_PATH = '../output/CNN_output_data_MAX'
 # 数据预处理所需的.json模板
 _C.OUTPUT.CNN_FORMAT_JSON_FILENAME = 'CNN_Format_Camera2.data'
@@ -106,8 +107,8 @@ _C.OUTPUT.SAVE_NET_FILENAME = '/20200908_162524_C2_CNN.pkl'
 # 加载模型优化器参数的文件名
 _C.OUTPUT.SAVE_OPTIMIZER_FILENAME = '/20200908_162524_C2_opt.pkl'
 # 记录打印内容
-# _C.OUTPUT.LOGGING = '../output/log.txt'
-_C.OUTPUT.LOGGING = '../output/log_MINI.txt'
+_C.OUTPUT.LOGGING = '../output/log.txt'
+# _C.OUTPUT.LOGGING = '../output/log_MINI.txt'
 
 # ---------------------------------------------------------------------------- #
 # Test
